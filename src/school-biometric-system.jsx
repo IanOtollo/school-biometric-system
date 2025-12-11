@@ -2,6 +2,148 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
 
+// Passcode Authentication Component
+const PasscodeLogin = ({ onSuccess }) => {
+  const [passcode, setPasscode] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Set your admin passcode here (change this!)
+  const ADMIN_PASSCODE = 'Mhs14328'; // Change to your secure passcode
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    // Simulate authentication delay
+    setTimeout(() => {
+      if (passcode === ADMIN_PASSCODE) {
+        localStorage.setItem('biometric_auth', 'true');
+        onSuccess();
+      } else {
+        setError('Invalid passcode. Please try again.');
+        setPasscode('');
+      }
+      setLoading(false);
+    }, 500);
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '2rem'
+    }}>
+      <div style={{
+        background: 'white',
+        padding: '3rem',
+        borderRadius: '16px',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        width: '100%',
+        maxWidth: '400px'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem',
+            fontSize: '2rem',
+            color: 'white'
+          }}>
+            
+          </div>
+          <h1 style={{
+            fontSize: '1.8rem',
+            fontWeight: '700',
+            color: '#1a202c',
+            marginBottom: '0.5rem'
+          }}>
+            Biometric Access System
+          </h1>
+          <p style={{ color: '#718096', fontSize: '0.95rem' }}>
+            Enter admin passcode to continue
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <input
+              type="password"
+              placeholder="Enter Passcode"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                fontSize: '1rem',
+                border: '2px solid #e2e8f0',
+                borderRadius: '8px',
+                outline: 'none',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                letterSpacing: '4px',
+                fontWeight: '600'
+              }}
+              maxLength="20"
+              autoFocus
+            />
+          </div>
+
+          {error && (
+            <div style={{
+              padding: '0.75rem',
+              background: '#fee',
+              color: '#c53030',
+              borderRadius: '6px',
+              marginBottom: '1rem',
+              fontSize: '0.9rem',
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !passcode}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              background: loading ? '#cbd5e0' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: loading || !passcode ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s'
+            }}
+          >
+            {loading ? 'Verifying...' : 'Access System'}
+          </button>
+        </form>
+
+        <p style={{
+          marginTop: '1.5rem',
+          textAlign: 'center',
+          fontSize: '0.85rem',
+          color: '#a0aec0'
+        }}>
+          Authorized Personnel Only
+        </p>
+      </div>
+    </div>
+  );
+};
 // Initialize Supabase client
 // Replace with your Supabase credentials
 const supabase = createClient(
@@ -11,9 +153,23 @@ const supabase = createClient(
 
 // Main App Component
 const BiometricAccessSystem = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('home');
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Check if already authenticated
+    const auth = localStorage.getItem('biometric_auth');
+    if (auth === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <PasscodeLogin onSuccess={() => setIsAuthenticated(true)} />;
+  }
 
   useEffect(() => {
     loadModels();
