@@ -67,7 +67,7 @@ const PasscodeLogin = ({ onSuccess }) => {
             color: '#1a202c',
             marginBottom: '0.5rem'
           }}>
-            Biometric Access System
+            BRENDA 🔥🔥, fanya mambo nikupee passcode
           </h1>
           <p style={{ color: '#718096', fontSize: '0.95rem' }}>
             Enter admin passcode to continue
