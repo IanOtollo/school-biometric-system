@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase } from 'lucide-react';
 
 // Initialize Supabase client
-// Replace with your Supabase credentials
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -20,13 +20,13 @@ const BiometricAccessSystem = () => {
   }, []);
 
   const loadModels = async () => {
-  try {
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-    await Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-    ]);
+    try {
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+      await Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+      ]);
       setModelsLoaded(true);
     } catch (error) {
       console.error('Error loading models:', error);
@@ -36,7 +36,7 @@ const BiometricAccessSystem = () => {
   return (
     <div className="app-container">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         * {
           margin: 0;
@@ -45,57 +45,41 @@ const BiometricAccessSystem = () => {
         }
 
         :root {
-          --primary: #00ff88;
-          --primary-dark: #00cc6a;
-          --secondary: #0088ff;
-          --dark: #0a0e1a;
-          --darker: #050810;
-          --light: #e0e7ff;
-          --danger: #ff3366;
-          --warning: #ffaa00;
-          --success: #00ff88;
+          --primary: #2563eb;
+          --primary-dark: #1e40af;
+          --primary-light: #3b82f6;
+          --secondary: #64748b;
+          --success: #10b981;
+          --danger: #ef4444;
+          --warning: #f59e0b;
+          --background: #f8fafc;
+          --surface: #ffffff;
+          --text-primary: #0f172a;
+          --text-secondary: #64748b;
+          --border: #e2e8f0;
+          --border-light: #f1f5f9;
         }
 
         body {
-          font-family: 'IBM Plex Sans', sans-serif;
-          background: var(--darker);
-          color: var(--light);
-          overflow-x: hidden;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          background: var(--background);
+          color: var(--text-primary);
+          line-height: 1.5;
         }
 
         .app-container {
           min-height: 100vh;
-          background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
-          position: relative;
-        }
-
-        .app-container::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: 
-            radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(0, 136, 255, 0.1) 0%, transparent 50%);
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .content {
-          position: relative;
-          z-index: 1;
+          background: var(--background);
         }
 
         .header {
-          padding: 2rem 3rem;
-          background: rgba(10, 14, 26, 0.8);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+          background: var(--surface);
+          border-bottom: 1px solid var(--border);
+          padding: 1rem 2rem;
           position: sticky;
           top: 0;
           z-index: 100;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .header-content {
@@ -107,94 +91,80 @@ const BiometricAccessSystem = () => {
         }
 
         .logo {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 1.8rem;
-          font-weight: 900;
-          background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          letter-spacing: -1px;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .logo svg {
+          color: var(--primary);
         }
 
         .nav-buttons {
           display: flex;
-          gap: 1rem;
+          gap: 0.5rem;
         }
 
         .btn {
-          padding: 0.8rem 1.8rem;
-          border: none;
-          border-radius: 8px;
-          font-family: 'IBM Plex Sans', sans-serif;
-          font-weight: 600;
-          font-size: 0.95rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.625rem 1.25rem;
+          border: 1px solid var(--border);
+          border-radius: 0.5rem;
+          font-family: 'Inter', sans-serif;
+          font-weight: 500;
+          font-size: 0.875rem;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          position: relative;
-          overflow: hidden;
+          transition: all 0.2s;
+          background: var(--surface);
+          color: var(--text-primary);
         }
 
-        .btn::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-          transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-          left: 100%;
+        .btn:hover {
+          background: var(--background);
+          border-color: var(--primary);
         }
 
         .btn-primary {
-          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-          color: var(--darker);
-          box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+          background: var(--primary);
+          color: white;
+          border-color: var(--primary);
         }
 
         .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 30px rgba(0, 255, 136, 0.5);
-        }
-
-        .btn-secondary {
-          background: transparent;
-          color: var(--light);
-          border: 2px solid rgba(0, 255, 136, 0.3);
-        }
-
-        .btn-secondary:hover {
-          border-color: var(--primary);
-          background: rgba(0, 255, 136, 0.1);
+          background: var(--primary-dark);
+          border-color: var(--primary-dark);
         }
 
         .btn-danger {
-          background: linear-gradient(135deg, var(--danger) 0%, #cc0044 100%);
+          background: var(--danger);
           color: white;
-          box-shadow: 0 4px 20px rgba(255, 51, 102, 0.3);
+          border-color: var(--danger);
         }
 
         .btn-danger:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 30px rgba(255, 51, 102, 0.5);
+          background: #dc2626;
+          border-color: #dc2626;
         }
 
         .btn:disabled {
           opacity: 0.5;
           cursor: not-allowed;
-          transform: none !important;
+        }
+
+        .btn svg {
+          width: 16px;
+          height: 16px;
         }
 
         .main-content {
           max-width: 1400px;
           margin: 0 auto;
-          padding: 3rem;
+          padding: 2rem;
         }
 
         .loading-overlay {
@@ -203,8 +173,7 @@ const BiometricAccessSystem = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(5, 8, 16, 0.9);
-          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.95);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -213,9 +182,9 @@ const BiometricAccessSystem = () => {
         }
 
         .spinner {
-          width: 60px;
-          height: 60px;
-          border: 3px solid rgba(0, 255, 136, 0.1);
+          width: 48px;
+          height: 48px;
+          border: 3px solid var(--border);
           border-top: 3px solid var(--primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
@@ -227,32 +196,33 @@ const BiometricAccessSystem = () => {
         }
 
         .loading-text {
-          margin-top: 1.5rem;
-          font-size: 1.1rem;
-          color: var(--primary);
-          font-family: 'Orbitron', sans-serif;
+          margin-top: 1rem;
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          font-weight: 500;
         }
 
-        .status-indicator {
+        .status-badge {
           position: fixed;
-          top: 100px;
-          right: 30px;
-          padding: 1rem 1.5rem;
-          background: rgba(10, 14, 26, 0.9);
-          border-radius: 12px;
-          border: 1px solid rgba(0, 255, 136, 0.2);
-          backdrop-filter: blur(20px);
+          top: 5rem;
+          right: 2rem;
+          padding: 0.5rem 1rem;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.5rem;
           display: flex;
           align-items: center;
-          gap: 0.8rem;
+          gap: 0.5rem;
+          font-size: 0.875rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           z-index: 99;
         }
 
         .status-dot {
-          width: 10px;
-          height: 10px;
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
-          background: var(--primary);
+          background: var(--success);
           animation: pulse 2s infinite;
         }
 
@@ -262,114 +232,429 @@ const BiometricAccessSystem = () => {
         }
 
         .home-view {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          min-height: calc(100vh - 200px);
-          text-align: center;
+          max-width: 1200px;
+          margin: 0 auto;
         }
 
-        .hero-title {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 4rem;
-          font-weight: 900;
-          margin-bottom: 1.5rem;
-          background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          letter-spacing: -2px;
-          line-height: 1.1;
+        .page-header {
+          margin-bottom: 2rem;
         }
 
-        .hero-subtitle {
-          font-size: 1.3rem;
-          color: rgba(224, 231, 255, 0.7);
-          margin-bottom: 3rem;
-          max-width: 600px;
+        .page-title {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+          font-size: 1rem;
+          color: var(--text-secondary);
         }
 
         .action-cards {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 2rem;
-          width: 100%;
-          max-width: 1000px;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 1.5rem;
           margin-top: 2rem;
         }
 
         .action-card {
-          background: rgba(26, 31, 53, 0.6);
-          border: 1px solid rgba(0, 255, 136, 0.1);
-          border-radius: 16px;
-          padding: 2.5rem;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          padding: 2rem;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.2s;
+        }
+
+        .action-card:hover {
+          border-color: var(--primary);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          transform: translateY(-2px);
+        }
+
+        .card-icon {
+          width: 48px;
+          height: 48px;
+          background: var(--primary);
+          color: white;
+          border-radius: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1.25rem;
+        }
+
+        .card-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          line-height: 1.6;
+        }
+
+        .content-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          padding: 2rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin-bottom: 1.5rem;
+          color: var(--text-primary);
+        }
+
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 2rem;
+        }
+
+        .form-group {
+          margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+
+        .form-label svg {
+          width: 16px;
+          height: 16px;
+          color: var(--text-secondary);
+        }
+
+        .form-input,
+        .form-select {
+          width: 100%;
+          padding: 0.625rem 0.875rem;
+          border: 1px solid var(--border);
+          border-radius: 0.5rem;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          color: var(--text-primary);
+          background: var(--surface);
+          transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+          outline: none;
+          border-color: var(--primary);
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .camera-container {
           position: relative;
+          width: 100%;
+          aspect-ratio: 4/3;
+          background: #000;
+          border-radius: 0.5rem;
+          overflow: hidden;
+          margin-bottom: 1rem;
+        }
+
+        .camera-container video,
+        .camera-container canvas {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .camera-container canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+
+        .alert {
+          padding: 0.875rem 1rem;
+          border-radius: 0.5rem;
+          margin-bottom: 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-size: 0.875rem;
+        }
+
+        .alert svg {
+          width: 20px;
+          height: 20px;
+          flex-shrink: 0;
+        }
+
+        .alert-success {
+          background: #d1fae5;
+          color: #065f46;
+          border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+          background: #dbeafe;
+          color: #1e40af;
+          border: 1px solid #93c5fd;
+        }
+
+        .button-group {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+        }
+
+        .button-group .btn {
+          flex: 1;
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .stat-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          padding: 1.5rem;
+        }
+
+        .stat-value {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: var(--primary);
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+
+        .tabs {
+          display: flex;
+          gap: 0.25rem;
+          border-bottom: 1px solid var(--border);
+          margin-bottom: 1.5rem;
+        }
+
+        .tab {
+          padding: 0.75rem 1.5rem;
+          background: transparent;
+          border: none;
+          color: var(--text-secondary);
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+          transition: all 0.2s;
+        }
+
+        .tab:hover {
+          color: var(--text-primary);
+        }
+
+        .tab.active {
+          color: var(--primary);
+          border-bottom-color: var(--primary);
+        }
+
+        .data-table {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
           overflow: hidden;
         }
 
-        .action-card::before {
-          content: '';
+        .table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .table th {
+          background: var(--background);
+          padding: 0.875rem 1rem;
+          text-align: left;
+          font-weight: 600;
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .table td {
+          padding: 1rem;
+          border-top: 1px solid var(--border-light);
+          font-size: 0.875rem;
+          color: var(--text-primary);
+        }
+
+        .table tr:hover {
+          background: var(--background);
+        }
+
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .badge-student {
+          background: #dbeafe;
+          color: #1e40af;
+        }
+
+        .badge-lecturer {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .badge-staff {
+          background: #e9d5ff;
+          color: #6b21a8;
+        }
+
+        .badge-success {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .badge-danger {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .badge-info {
+          background: #dbeafe;
+          color: #1e40af;
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 4rem 2rem;
+          color: var(--text-secondary);
+        }
+
+        .empty-icon {
+          width: 64px;
+          height: 64px;
+          margin: 0 auto 1rem;
+          color: var(--border);
+        }
+
+        .verification-overlay {
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
-          height: 4px;
-          background: linear-gradient(90deg, var(--primary), var(--secondary));
-          transform: scaleX(0);
-          transition: transform 0.3s;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.85);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          z-index: 10;
         }
 
-        .action-card:hover {
-          transform: translateY(-8px);
-          border-color: var(--primary);
-          box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
-        }
-
-        .action-card:hover::before {
-          transform: scaleX(1);
-        }
-
-        .card-icon {
-          font-size: 3rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 1.5rem;
-          font-weight: 700;
+        .result-icon {
+          width: 80px;
+          height: 80px;
           margin-bottom: 1rem;
-          color: var(--primary);
         }
 
-        .card-description {
-          color: rgba(224, 231, 255, 0.7);
-          line-height: 1.6;
+        .result-name {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 0.5rem;
+          color: white;
+        }
+
+        .result-role {
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 0.25rem;
+        }
+
+        .result-confidence {
+          font-size: 0.875rem;
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        .controls {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .checkbox-label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.625rem 1.25rem;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.5rem;
+          cursor: pointer;
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+
+        .checkbox-label:hover {
+          background: var(--background);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
         }
 
         @media (max-width: 768px) {
           .header {
-            padding: 1.5rem;
+            padding: 1rem;
           }
 
-          .header-content {
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          .hero-title {
-            font-size: 2.5rem;
+          .main-content {
+            padding: 1rem;
           }
 
           .action-cards {
             grid-template-columns: 1fr;
           }
 
-          .main-content {
-            padding: 1.5rem;
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .button-group {
+            flex-direction: column;
           }
         }
       `}</style>
@@ -377,18 +662,23 @@ const BiometricAccessSystem = () => {
       <div className="content">
         <header className="header">
           <div className="header-content">
-            <div className="logo">🔐 SecureEntry</div>
+            <div className="logo">
+              <Shield size={24} />
+              <span>Biometric Access System</span>
+            </div>
             <nav className="nav-buttons">
               <button 
-                className="btn btn-secondary" 
+                className="btn" 
                 onClick={() => setCurrentView('home')}
               >
+                <Home size={16} />
                 Home
               </button>
               <button 
-                className="btn btn-secondary" 
+                className="btn" 
                 onClick={() => setCurrentView('dashboard')}
               >
+                <LayoutDashboard size={16} />
                 Dashboard
               </button>
             </nav>
@@ -396,7 +686,7 @@ const BiometricAccessSystem = () => {
         </header>
 
         {modelsLoaded && (
-          <div className="status-indicator">
+          <div className="status-badge">
             <div className="status-dot"></div>
             <span>System Ready</span>
           </div>
@@ -434,14 +724,18 @@ const BiometricAccessSystem = () => {
 const HomeView = ({ setCurrentView }) => {
   return (
     <div className="home-view">
-      <h1 className="hero-title">Biometric Access Control</h1>
-      <p className="hero-subtitle">
-        Secure, fast, and efficient facial recognition system for school entry management
-      </p>
+      <div className="page-header">
+        <h1 className="page-title">Biometric Access Control</h1>
+        <p className="page-subtitle">
+          Secure facial recognition system for institutional access management
+        </p>
+      </div>
       
       <div className="action-cards">
         <div className="action-card" onClick={() => setCurrentView('register')}>
-          <div className="card-icon">👤</div>
+          <div className="card-icon">
+            <UserPlus size={24} />
+          </div>
           <h3 className="card-title">Register New User</h3>
           <p className="card-description">
             Enroll students, lecturers, and staff members into the system
@@ -449,7 +743,9 @@ const HomeView = ({ setCurrentView }) => {
         </div>
         
         <div className="action-card" onClick={() => setCurrentView('verify')}>
-          <div className="card-icon">🔍</div>
+          <div className="card-icon">
+            <ScanFace size={24} />
+          </div>
           <h3 className="card-title">Verify Access</h3>
           <p className="card-description">
             Scan face for instant verification and entry authorization
@@ -457,7 +753,9 @@ const HomeView = ({ setCurrentView }) => {
         </div>
         
         <div className="action-card" onClick={() => setCurrentView('dashboard')}>
-          <div className="card-icon">📊</div>
+          <div className="card-icon">
+            <LayoutDashboard size={24} />
+          </div>
           <h3 className="card-title">View Dashboard</h3>
           <p className="card-description">
             Monitor access logs and manage registered users
@@ -522,7 +820,6 @@ const RegisterView = ({ setCurrentView }) => {
         setCapturedDescriptor(Array.from(detections.descriptor));
         setMessage({ type: 'success', text: 'Face captured successfully!' });
         
-        // Draw on canvas
         const canvas = canvasRef.current;
         const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
         faceapi.matchDimensions(canvas, displaySize);
@@ -573,7 +870,6 @@ const RegisterView = ({ setCurrentView }) => {
 
       setMessage({ type: 'success', text: 'Registration successful!' });
       
-      // Log the registration
       await supabase.from('access_logs').insert([{
         user_id: formData.idNumber,
         name: formData.name,
@@ -592,236 +888,108 @@ const RegisterView = ({ setCurrentView }) => {
 
   return (
     <div>
-      <style>{`
-        .register-container {
-          max-width: 900px;
-          margin: 0 auto;
-        }
-
-        .page-title {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 2.5rem;
-          font-weight: 900;
-          margin-bottom: 0.5rem;
-          color: var(--primary);
-        }
-
-        .page-subtitle {
-          color: rgba(224, 231, 255, 0.6);
-          margin-bottom: 2.5rem;
-        }
-
-        .register-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 2rem;
-        }
-
-        .camera-section {
-          background: rgba(26, 31, 53, 0.6);
-          border: 1px solid rgba(0, 255, 136, 0.1);
-          border-radius: 16px;
-          padding: 2rem;
-        }
-
-        .camera-container {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4/3;
-          background: var(--darker);
-          border-radius: 12px;
-          overflow: hidden;
-          margin-bottom: 1.5rem;
-        }
-
-        .camera-container video,
-        .camera-container canvas {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .camera-container canvas {
-          position: absolute;
-          top: 0;
-          left: 0;
-        }
-
-        .form-section {
-          background: rgba(26, 31, 53, 0.6);
-          border: 1px solid rgba(0, 255, 136, 0.1);
-          border-radius: 16px;
-          padding: 2rem;
-        }
-
-        .form-group {
-          margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-          display: block;
-          margin-bottom: 0.5rem;
-          color: var(--light);
-          font-weight: 500;
-          font-size: 0.9rem;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .form-input,
-        .form-select {
-          width: 100%;
-          padding: 0.9rem 1.2rem;
-          background: rgba(10, 14, 26, 0.8);
-          border: 1px solid rgba(0, 255, 136, 0.2);
-          border-radius: 8px;
-          color: var(--light);
-          font-family: 'IBM Plex Sans', sans-serif;
-          font-size: 1rem;
-          transition: all 0.3s;
-        }
-
-        .form-input:focus,
-        .form-select:focus {
-          outline: none;
-          border-color: var(--primary);
-          box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
-        }
-
-        .message {
-          padding: 1rem 1.5rem;
-          border-radius: 8px;
-          margin-bottom: 1.5rem;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .message.success {
-          background: rgba(0, 255, 136, 0.1);
-          border: 1px solid var(--success);
-          color: var(--success);
-        }
-
-        .message.error {
-          background: rgba(255, 51, 102, 0.1);
-          border: 1px solid var(--danger);
-          color: var(--danger);
-        }
-
-        .message.info {
-          background: rgba(0, 136, 255, 0.1);
-          border: 1px solid var(--secondary);
-          color: var(--secondary);
-        }
-
-        .button-group {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1.5rem;
-        }
-
-        .button-group .btn {
-          flex: 1;
-        }
-
-        @media (max-width: 768px) {
-          .register-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-
-      <div className="register-container">
+      <div className="page-header">
         <h1 className="page-title">Register New User</h1>
         <p className="page-subtitle">Enroll a new member into the biometric system</p>
+      </div>
 
-        {message.text && (
-          <div className={`message ${message.type}`}>
-            {message.type === 'success' && '✓'}
-            {message.type === 'error' && '✗'}
-            {message.type === 'info' && 'ℹ'}
-            {message.text}
+      {message.text && (
+        <div className={`alert alert-${message.type}`}>
+          {message.type === 'success' && <CheckCircle />}
+          {message.type === 'error' && <XCircle />}
+          {message.type === 'info' && <AlertCircle />}
+          {message.text}
+        </div>
+      )}
+
+      <div className="form-grid">
+        <div className="content-card">
+          <h3 className="card-header">Face Capture</h3>
+          <div className="camera-container">
+            <video ref={videoRef} autoPlay muted />
+            <canvas ref={canvasRef} />
           </div>
-        )}
+          <button 
+            className="btn btn-primary" 
+            onClick={captureFace}
+            disabled={isCapturing}
+            style={{ width: '100%' }}
+          >
+            <Camera size={16} />
+            {isCapturing ? 'Capturing...' : capturedDescriptor ? 'Recapture Face' : 'Capture Face'}
+          </button>
+        </div>
 
-        <div className="register-grid">
-          <div className="camera-section">
-            <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Face Capture</h3>
-            <div className="camera-container">
-              <video ref={videoRef} autoPlay muted />
-              <canvas ref={canvasRef} />
+        <div className="content-card">
+          <h3 className="card-header">User Details</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">
+                <User size={16} />
+                Full Name *
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
             </div>
-            <button 
-              className="btn btn-primary" 
-              onClick={captureFace}
-              disabled={isCapturing}
-              style={{ width: '100%' }}
-            >
-              {isCapturing ? 'Capturing...' : capturedDescriptor ? 'Recapture Face' : 'Capture Face'}
-            </button>
-          </div>
 
-          <div className="form-section">
-            <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>User Details</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label">Full Name *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">
+                <Hash size={16} />
+                ID Number *
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={formData.idNumber}
+                onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
+                required
+              />
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">ID Number *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.idNumber}
-                  onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">
+                <Briefcase size={16} />
+                Role *
+              </label>
+              <select
+                className="form-select"
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                required
+              >
+                <option value="student">Student</option>
+                <option value="lecturer">Lecturer</option>
+                <option value="staff">Support Staff</option>
+              </select>
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">Role *</label>
-                <select
-                  className="form-select"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  required
-                >
-                  <option value="student">Student</option>
-                  <option value="lecturer">Lecturer</option>
-                  <option value="staff">Support Staff</option>
-                </select>
-              </div>
+            <div className="form-group">
+              <label className="form-label">
+                <Mail size={16} />
+                Email
+              </label>
+              <input
+                type="email"
+                className="form-input"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-
-              <div className="button-group">
-                <button type="button" className="btn btn-secondary" onClick={() => setCurrentView('home')}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Register User
-                </button>
-              </div>
-            </form>
-          </div>
+            <div className="button-group">
+              <button type="button" className="btn" onClick={() => setCurrentView('home')}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Register User
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -901,7 +1069,6 @@ const VerifyView = ({ setCurrentView }) => {
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
       faceapi.draw.drawDetections(canvas, resizedDetections);
 
-      // Fetch all registered users
       const { data: users, error } = await supabase
         .from('users')
         .select('*');
@@ -918,8 +1085,7 @@ const VerifyView = ({ setCurrentView }) => {
         return;
       }
 
-      // Compare with registered faces
-      const threshold = 0.6; // Lower is more strict
+      const threshold = 0.6;
       let bestMatch = null;
       let bestDistance = 1;
 
@@ -936,7 +1102,6 @@ const VerifyView = ({ setCurrentView }) => {
       }
 
       if (bestMatch) {
-        // Log successful access
         await supabase.from('access_logs').insert([{
           user_id: bestMatch.id_number,
           name: bestMatch.name,
@@ -957,7 +1122,6 @@ const VerifyView = ({ setCurrentView }) => {
           setTimeout(() => setVerificationResult(null), 3000);
         }
       } else {
-        // Log denied access
         await supabase.from('access_logs').insert([{
           user_id: 'unknown',
           name: 'Unknown Person',
@@ -990,194 +1154,72 @@ const VerifyView = ({ setCurrentView }) => {
 
   return (
     <div>
-      <style>{`
-        .verify-container {
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
-        .verify-camera {
-          background: rgba(26, 31, 53, 0.6);
-          border: 1px solid rgba(0, 255, 136, 0.1);
-          border-radius: 16px;
-          padding: 2rem;
-        }
-
-        .camera-view {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4/3;
-          background: var(--darker);
-          border-radius: 12px;
-          overflow: hidden;
-          margin-bottom: 2rem;
-          border: 2px solid rgba(0, 255, 136, 0.3);
-        }
-
-        .verification-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.7);
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          z-index: 10;
-          animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .result-icon {
-          font-size: 5rem;
-          margin-bottom: 1rem;
-          animation: scaleIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes scaleIn {
-          0% { transform: scale(0); }
-          100% { transform: scale(1); }
-        }
-
-        .result-name {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 2rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-        }
-
-        .result-role {
-          font-size: 1.2rem;
-          opacity: 0.8;
-          margin-bottom: 0.5rem;
-        }
-
-        .result-confidence {
-          font-size: 0.9rem;
-          opacity: 0.6;
-        }
-
-        .controls {
-          display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-
-        .mode-toggle {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.8rem 1.5rem;
-          background: rgba(10, 14, 26, 0.8);
-          border: 1px solid rgba(0, 255, 136, 0.2);
-          border-radius: 8px;
-          color: var(--light);
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .mode-toggle:hover {
-          border-color: var(--primary);
-          background: rgba(0, 255, 136, 0.1);
-        }
-
-        .mode-toggle input[type="checkbox"] {
-          width: 20px;
-          height: 20px;
-          cursor: pointer;
-        }
-
-        .scanning-indicator {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          padding: 0.8rem 1.2rem;
-          background: rgba(0, 255, 136, 0.9);
-          color: var(--darker);
-          border-radius: 8px;
-          font-weight: 600;
-          animation: pulse 1.5s infinite;
-          z-index: 5;
-        }
-      `}</style>
-
-      <div className="verify-container">
+      <div className="page-header">
         <h1 className="page-title">Access Verification</h1>
         <p className="page-subtitle">Scan face for instant entry authorization</p>
+      </div>
 
-        <div className="verify-camera">
-          <div className="camera-view">
-            <video ref={videoRef} autoPlay muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
-            
-            {isVerifying && (
-              <div className="scanning-indicator">
-                🔍 Scanning...
-              </div>
-            )}
+      <div className="content-card">
+        <div className="camera-container">
+          <video ref={videoRef} autoPlay muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
+          
+          {verificationResult && (
+            <div className="verification-overlay">
+              {verificationResult.success ? (
+                <>
+                  <CheckCircle className="result-icon" color="#10b981" />
+                  <div className="result-name">
+                    {verificationResult.user.name}
+                  </div>
+                  <div className="result-role">
+                    {verificationResult.user.role.toUpperCase()}
+                  </div>
+                  <div className="result-confidence">
+                    Confidence: {verificationResult.confidence}%
+                  </div>
+                </>
+              ) : (
+                <>
+                  <XCircle className="result-icon" color="#ef4444" />
+                  <div className="result-name">
+                    Access Denied
+                  </div>
+                  <div className="result-role">
+                    {verificationResult.message}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
-            {verificationResult && (
-              <div className="verification-overlay">
-                {verificationResult.success ? (
-                  <>
-                    <div className="result-icon">✅</div>
-                    <div className="result-name" style={{ color: 'var(--success)' }}>
-                      {verificationResult.user.name}
-                    </div>
-                    <div className="result-role">
-                      {verificationResult.user.role.toUpperCase()}
-                    </div>
-                    <div className="result-confidence">
-                      Confidence: {verificationResult.confidence}%
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="result-icon">❌</div>
-                    <div className="result-name" style={{ color: 'var(--danger)' }}>
-                      Access Denied
-                    </div>
-                    <div className="result-role">
-                      {verificationResult.message}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="controls">
+          <button 
+            className="btn btn-primary" 
+            onClick={verifyFace}
+            disabled={isVerifying || continuousMode}
+            style={{ flex: 1 }}
+          >
+            <ScanFace size={16} />
+            {isVerifying ? 'Verifying...' : 'Verify Face'}
+          </button>
 
-          <div className="controls">
-            <button 
-              className="btn btn-primary" 
-              onClick={verifyFace}
-              disabled={isVerifying || continuousMode}
-              style={{ flex: 1 }}
-            >
-              {isVerifying ? 'Verifying...' : 'Verify Face'}
-            </button>
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={continuousMode}
+              onChange={(e) => setContinuousMode(e.target.checked)}
+            />
+            <span>Continuous Mode</span>
+          </label>
 
-            <label className="mode-toggle">
-              <input
-                type="checkbox"
-                checked={continuousMode}
-                onChange={(e) => setContinuousMode(e.target.checked)}
-              />
-              <span>Continuous Mode</span>
-            </label>
-
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => setCurrentView('home')}
-            >
-              Back to Home
-            </button>
-          </div>
+          <button 
+            className="btn" 
+            onClick={() => setCurrentView('home')}
+          >
+            Back to Home
+          </button>
         </div>
       </div>
     </div>
@@ -1198,7 +1240,6 @@ const DashboardView = ({ setCurrentView }) => {
 
   const fetchData = async () => {
     try {
-      // Fetch users
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
@@ -1208,7 +1249,6 @@ const DashboardView = ({ setCurrentView }) => {
 
       setUsers(usersData || []);
 
-      // Calculate stats
       const studentCount = usersData?.filter(u => u.role === 'student').length || 0;
       const lecturerCount = usersData?.filter(u => u.role === 'lecturer').length || 0;
       const staffCount = usersData?.filter(u => u.role === 'staff').length || 0;
@@ -1220,7 +1260,6 @@ const DashboardView = ({ setCurrentView }) => {
         staff: staffCount
       });
 
-      // Fetch access logs
       const { data: logsData, error: logsError } = await supabase
         .from('access_logs')
         .select('*')
@@ -1257,321 +1296,150 @@ const DashboardView = ({ setCurrentView }) => {
 
   return (
     <div>
-      <style>{`
-        .dashboard-container {
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 1.5rem;
-          margin-bottom: 2.5rem;
-        }
-
-        .stat-card {
-          background: rgba(26, 31, 53, 0.6);
-          border: 1px solid rgba(0, 255, 136, 0.1);
-          border-radius: 16px;
-          padding: 2rem;
-          transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-          transform: translateY(-4px);
-          border-color: var(--primary);
-        }
-
-        .stat-value {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 3rem;
-          font-weight: 900;
-          color: var(--primary);
-          margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-          color: rgba(224, 231, 255, 0.7);
-          text-transform: uppercase;
-          font-size: 0.9rem;
-          letter-spacing: 1px;
-        }
-
-        .tabs {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 2rem;
-          border-bottom: 2px solid rgba(0, 255, 136, 0.1);
-        }
-
-        .tab {
-          padding: 1rem 2rem;
-          background: transparent;
-          border: none;
-          color: rgba(224, 231, 255, 0.6);
-          font-family: 'IBM Plex Sans', sans-serif;
-          font-size: 1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-          position: relative;
-        }
-
-        .tab.active {
-          color: var(--primary);
-        }
-
-        .tab.active::after {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: var(--primary);
-        }
-
-        .data-table {
-          background: rgba(26, 31, 53, 0.6);
-          border: 1px solid rgba(0, 255, 136, 0.1);
-          border-radius: 16px;
-          overflow: hidden;
-        }
-
-        .table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .table th {
-          background: rgba(0, 255, 136, 0.1);
-          padding: 1.2rem 1.5rem;
-          text-align: left;
-          font-weight: 600;
-          color: var(--primary);
-          text-transform: uppercase;
-          font-size: 0.85rem;
-          letter-spacing: 1px;
-        }
-
-        .table td {
-          padding: 1.2rem 1.5rem;
-          border-top: 1px solid rgba(0, 255, 136, 0.05);
-          color: var(--light);
-        }
-
-        .table tr:hover {
-          background: rgba(0, 255, 136, 0.05);
-        }
-
-        .role-badge {
-          display: inline-block;
-          padding: 0.4rem 1rem;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          text-transform: uppercase;
-        }
-
-        .role-badge.student {
-          background: rgba(0, 136, 255, 0.2);
-          color: var(--secondary);
-        }
-
-        .role-badge.lecturer {
-          background: rgba(255, 170, 0, 0.2);
-          color: var(--warning);
-        }
-
-        .role-badge.staff {
-          background: rgba(138, 43, 226, 0.2);
-          color: #b47fff;
-        }
-
-        .action-badge {
-          display: inline-block;
-          padding: 0.4rem 1rem;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-        }
-
-        .action-badge.granted {
-          background: rgba(0, 255, 136, 0.2);
-          color: var(--success);
-        }
-
-        .action-badge.denied {
-          background: rgba(255, 51, 102, 0.2);
-          color: var(--danger);
-        }
-
-        .action-badge.registered {
-          background: rgba(0, 136, 255, 0.2);
-          color: var(--secondary);
-        }
-
-        .btn-small {
-          padding: 0.5rem 1rem;
-          font-size: 0.85rem;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 4rem 2rem;
-          color: rgba(224, 231, 255, 0.5);
-        }
-
-        .empty-state-icon {
-          font-size: 4rem;
-          margin-bottom: 1rem;
-        }
-      `}</style>
-
-      <div className="dashboard-container">
+      <div className="page-header">
         <h1 className="page-title">System Dashboard</h1>
         <p className="page-subtitle">Monitor and manage your biometric access system</p>
-
-        {loading ? (
-          <div className="empty-state">
-            <div className="spinner" style={{ margin: '0 auto' }}></div>
-            <p>Loading dashboard data...</p>
-          </div>
-        ) : (
-          <>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-value">{stats.total}</div>
-                <div className="stat-label">Total Users</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.students}</div>
-                <div className="stat-label">Students</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.lecturers}</div>
-                <div className="stat-label">Lecturers</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.staff}</div>
-                <div className="stat-label">Support Staff</div>
-              </div>
-            </div>
-
-            <div className="tabs">
-              <button 
-                className={`tab ${activeTab === 'users' ? 'active' : ''}`}
-                onClick={() => setActiveTab('users')}
-              >
-                Registered Users
-              </button>
-              <button 
-                className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
-                onClick={() => setActiveTab('logs')}
-              >
-                Access Logs
-              </button>
-            </div>
-
-            {activeTab === 'users' && (
-              <div className="data-table">
-                {users.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-state-icon">👥</div>
-                    <p>No users registered yet</p>
-                  </div>
-                ) : (
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>ID Number</th>
-                        <th>Role</th>
-                        <th>Email</th>
-                        <th>Registered</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map((user) => (
-                        <tr key={user.id_number}>
-                          <td>{user.name}</td>
-                          <td>{user.id_number}</td>
-                          <td>
-                            <span className={`role-badge ${user.role}`}>
-                              {user.role}
-                            </span>
-                          </td>
-                          <td>{user.email || '-'}</td>
-                          <td>{new Date(user.registered_at).toLocaleDateString()}</td>
-                          <td>
-                            <button 
-                              className="btn btn-danger btn-small"
-                              onClick={() => deleteUser(user.id_number)}
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'logs' && (
-              <div className="data-table">
-                {accessLogs.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-state-icon">📋</div>
-                    <p>No access logs yet</p>
-                  </div>
-                ) : (
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>ID Number</th>
-                        <th>Role</th>
-                        <th>Action</th>
-                        <th>Confidence</th>
-                        <th>Timestamp</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {accessLogs.map((log, index) => (
-                        <tr key={index}>
-                          <td>{log.name}</td>
-                          <td>{log.user_id}</td>
-                          <td>
-                            {log.role ? (
-                              <span className={`role-badge ${log.role}`}>
-                                {log.role}
-                              </span>
-                            ) : '-'}
-                          </td>
-                          <td>
-                            <span className={`action-badge ${
-                              log.action === 'access_granted' ? 'granted' : 
-                              log.action === 'access_denied' ? 'denied' : 'registered'
-                            }`}>
-                              {log.action.replace('_', ' ')}
-                            </span>
-                          </td>
-                          <td>{log.confidence ? `${log.confidence}%` : '-'}</td>
-                          <td>{new Date(log.timestamp).toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
-          </>
-        )}
       </div>
+
+      {loading ? (
+        <div className="empty-state">
+          <div className="spinner" style={{ margin: '0 auto' }}></div>
+          <p>Loading dashboard data...</p>
+        </div>
+      ) : (
+        <>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-value">{stats.total}</div>
+              <div className="stat-label">Total Users</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.students}</div>
+              <div className="stat-label">Students</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.lecturers}</div>
+              <div className="stat-label">Lecturers</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.staff}</div>
+              <div className="stat-label">Support Staff</div>
+            </div>
+          </div>
+
+          <div className="tabs">
+            <button 
+              className={`tab ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              Registered Users
+            </button>
+            <button 
+              className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
+              onClick={() => setActiveTab('logs')}
+            >
+              Access Logs
+            </button>
+          </div>
+
+          {activeTab === 'users' && (
+            <div className="data-table">
+              {users.length === 0 ? (
+                <div className="empty-state">
+                  <Users className="empty-icon" />
+                  <p>No users registered yet</p>
+                </div>
+              ) : (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>ID Number</th>
+                      <th>Role</th>
+                      <th>Email</th>
+                      <th>Registered</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr key={user.id_number}>
+                        <td>{user.name}</td>
+                        <td>{user.id_number}</td>
+                        <td>
+                          <span className={`badge badge-${user.role}`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td>{user.email || '-'}</td>
+                        <td>{new Date(user.registered_at).toLocaleDateString()}</td>
+                        <td>
+                          <button 
+                            className="btn btn-danger"
+                            onClick={() => deleteUser(user.id_number)}
+                            style={{ padding: '0.375rem 0.75rem' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'logs' && (
+            <div className="data-table">
+              {accessLogs.length === 0 ? (
+                <div className="empty-state">
+                  <AlertCircle className="empty-icon" />
+                  <p>No access logs yet</p>
+                </div>
+              ) : (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>ID Number</th>
+                      <th>Role</th>
+                      <th>Action</th>
+                      <th>Confidence</th>
+                      <th>Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accessLogs.map((log, index) => (
+                      <tr key={index}>
+                        <td>{log.name}</td>
+                        <td>{log.user_id}</td>
+                        <td>
+                          {log.role ? (
+                            <span className={`badge badge-${log.role}`}>
+                              {log.role}
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td>
+                          <span className={`badge badge-${
+                            log.action === 'access_granted' ? 'success' : 
+                            log.action === 'access_denied' ? 'danger' : 'info'
+                          }`}>
+                            {log.action.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td>{log.confidence ? `${Math.round(log.confidence)}%` : '-'}</td>
+                        <td>{new Date(log.timestamp).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
