@@ -11,36 +11,21 @@ const supabase = createClient(
 
 // Main App Component
 const BiometricAccessSystem = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('home');
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Check if already authenticated
-    const auth = localStorage.getItem('biometric_auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // Show login screen if not authenticated
-  if (!isAuthenticated) {
-    return <PasscodeLogin onSuccess={() => setIsAuthenticated(true)} />;
-  }
 
   useEffect(() => {
     loadModels();
   }, []);
 
   const loadModels = async () => {
-  try {
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-    await Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-    ]);
+    try {
+      await Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+      ]);
       setModelsLoaded(true);
     } catch (error) {
       console.error('Error loading models:', error);
