@@ -70,6 +70,14 @@ const BiometricAccessSystem = () => {
         .app-container {
           min-height: 100vh;
           background: var(--background);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
         }
 
         .header {
@@ -162,9 +170,38 @@ const BiometricAccessSystem = () => {
         }
 
         .main-content {
+          flex: 1;
           max-width: 1400px;
+          width: 100%;
           margin: 0 auto;
           padding: 2rem;
+        }
+
+        .footer {
+          background: var(--surface);
+          border-top: 1px solid var(--border);
+          padding: 2rem;
+          margin-top: auto;
+        }
+
+        .footer-content {
+          max-width: 1400px;
+          margin: 0 auto;
+          text-align: center;
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+        }
+
+        .footer-link {
+          color: var(--primary);
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+          color: var(--primary-dark);
+          text-decoration: underline;
         }
 
         .loading-overlay {
@@ -656,6 +693,10 @@ const BiometricAccessSystem = () => {
           .button-group {
             flex-direction: column;
           }
+
+          .nav-buttons {
+            flex-wrap: wrap;
+          }
         }
       `}</style>
 
@@ -708,6 +749,12 @@ const BiometricAccessSystem = () => {
             <DashboardView setCurrentView={setCurrentView} />
           ) : null}
         </main>
+
+        <footer className="footer">
+          <div className="footer-content">
+            © {new Date().getFullYear()} <a href="https://ianotollo.vercel.app" target="_blank" rel="noopener noreferrer" className="footer-link">Ian Otollo</a>. All rights reserved.
+          </div>
+        </footer>
       </div>
 
       {loading && (
