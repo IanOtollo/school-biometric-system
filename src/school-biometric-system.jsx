@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
-import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase } from 'lucide-react';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText } from 'lucide-react';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -378,7 +378,8 @@ const BiometricAccessSystem = () => {
         }
 
         .form-input,
-        .form-select {
+        .form-select,
+        .form-textarea {
           width: 100%;
           padding: 0.625rem 0.875rem;
           border: 1px solid var(--border);
@@ -390,8 +391,14 @@ const BiometricAccessSystem = () => {
           transition: all 0.2s;
         }
 
+        .form-textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+
         .form-input:focus,
-        .form-select:focus {
+        .form-select:focus,
+        .form-textarea:focus {
           outline: none;
           border-color: var(--primary);
           box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -448,6 +455,12 @@ const BiometricAccessSystem = () => {
           border: 1px solid #fca5a5;
         }
 
+        .alert-warning {
+          background: #fef3c7;
+          color: #92400e;
+          border: 1px solid #fcd34d;
+        }
+
         .alert-info {
           background: #dbeafe;
           color: #1e40af;
@@ -466,7 +479,7 @@ const BiometricAccessSystem = () => {
 
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           gap: 1.5rem;
           margin-bottom: 2rem;
         }
@@ -563,6 +576,31 @@ const BiometricAccessSystem = () => {
           font-weight: 500;
         }
 
+        .badge-active {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .badge-graduate {
+          background: #e0e7ff;
+          color: #3730a3;
+        }
+
+        .badge-suspended {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .badge-discontinued {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .badge-visitor {
+          background: #e9d5ff;
+          color: #6b21a8;
+        }
+
         .badge-student {
           background: #dbeafe;
           color: #1e40af;
@@ -639,6 +677,14 @@ const BiometricAccessSystem = () => {
           margin-bottom: 0.25rem;
         }
 
+        .result-status {
+          font-size: 1.25rem;
+          font-weight: 600;
+          padding: 0.5rem 1rem;
+          border-radius: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
         .result-confidence {
           font-size: 0.875rem;
           color: rgba(255, 255, 255, 0.6);
@@ -697,6 +743,10 @@ const BiometricAccessSystem = () => {
           .nav-buttons {
             flex-wrap: wrap;
           }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       `}</style>
 
@@ -705,7 +755,7 @@ const BiometricAccessSystem = () => {
           <div className="header-content">
             <div className="logo">
               <Shield size={24} />
-              <span>Biometric Access System</span>
+              <span>Campus Gate Access System</span>
             </div>
             <nav className="nav-buttons">
               <button 
@@ -772,9 +822,9 @@ const HomeView = ({ setCurrentView }) => {
   return (
     <div className="home-view">
       <div className="page-header">
-        <h1 className="page-title">Biometric Access Control</h1>
+        <h1 className="page-title">Campus Gate Access Control</h1>
         <p className="page-subtitle">
-          Secure facial recognition system for institutional access management
+          Automated facial recognition system for campus entry management with status verification
         </p>
       </div>
       
@@ -783,9 +833,9 @@ const HomeView = ({ setCurrentView }) => {
           <div className="card-icon">
             <UserPlus size={24} />
           </div>
-          <h3 className="card-title">Register New User</h3>
+          <h3 className="card-title">Register Person</h3>
           <p className="card-description">
-            Enroll students, lecturers, and staff members into the system
+            Enroll students, staff, or register visitors with temporary access
           </p>
         </div>
         
@@ -793,9 +843,9 @@ const HomeView = ({ setCurrentView }) => {
           <div className="card-icon">
             <ScanFace size={24} />
           </div>
-          <h3 className="card-title">Verify Access</h3>
+          <h3 className="card-title">Verify Entry</h3>
           <p className="card-description">
-            Scan face for instant verification and entry authorization
+            Scan face to verify identity and check status (Active, Graduate, Suspended, Visitor)
           </p>
         </div>
         
@@ -805,7 +855,7 @@ const HomeView = ({ setCurrentView }) => {
           </div>
           <h3 className="card-title">View Dashboard</h3>
           <p className="card-description">
-            Monitor access logs and manage registered users
+            Monitor access logs and manage registered individuals by status
           </p>
         </div>
       </div>
@@ -822,7 +872,10 @@ const RegisterView = ({ setCurrentView }) => {
     name: '',
     idNumber: '',
     role: 'student',
-    email: ''
+    status: 'active',
+    email: '',
+    visitPurpose: '',
+    validUntil: ''
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -897,8 +950,13 @@ const RegisterView = ({ setCurrentView }) => {
       return;
     }
 
+    if (formData.status === 'visitor' && !formData.visitPurpose) {
+      setMessage({ type: 'error', text: 'Please specify visit purpose for visitors' });
+      return;
+    }
+
     try {
-      setMessage({ type: 'info', text: 'Registering user...' });
+      setMessage({ type: 'info', text: 'Registering person...' });
 
       const { data, error } = await supabase
         .from('users')
@@ -907,7 +965,10 @@ const RegisterView = ({ setCurrentView }) => {
             name: formData.name,
             id_number: formData.idNumber,
             role: formData.role,
+            status: formData.status,
             email: formData.email,
+            visit_purpose: formData.visitPurpose || null,
+            valid_until: formData.validUntil || null,
             face_descriptor: capturedDescriptor,
             registered_at: new Date().toISOString()
           }
@@ -936,8 +997,8 @@ const RegisterView = ({ setCurrentView }) => {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Register New User</h1>
-        <p className="page-subtitle">Enroll a new member into the biometric system</p>
+        <h1 className="page-title">Register New Person</h1>
+        <p className="page-subtitle">Enroll students, staff, or visitors into the campus access system</p>
       </div>
 
       {message.text && (
@@ -968,7 +1029,7 @@ const RegisterView = ({ setCurrentView }) => {
         </div>
 
         <div className="content-card">
-          <h3 className="card-header">User Details</h3>
+          <h3 className="card-header">Person Details</h3>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">
@@ -1001,7 +1062,7 @@ const RegisterView = ({ setCurrentView }) => {
             <div className="form-group">
               <label className="form-label">
                 <Briefcase size={16} />
-                Role *
+                Category *
               </label>
               <select
                 className="form-select"
@@ -1014,6 +1075,56 @@ const RegisterView = ({ setCurrentView }) => {
                 <option value="staff">Support Staff</option>
               </select>
             </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <AlertCircle size={16} />
+                Status *
+              </label>
+              <select
+                className="form-select"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                required
+              >
+                <option value="active">Active</option>
+                <option value="graduate">Graduate</option>
+                <option value="suspended">Suspended</option>
+                <option value="discontinued">Discontinued</option>
+                <option value="visitor">Visitor</option>
+              </select>
+            </div>
+
+            {formData.status === 'visitor' && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">
+                    <FileText size={16} />
+                    Visit Purpose *
+                  </label>
+                  <textarea
+                    className="form-textarea"
+                    value={formData.visitPurpose}
+                    onChange={(e) => setFormData({ ...formData, visitPurpose: e.target.value })}
+                    placeholder="e.g., Parent visiting student, Guest speaker, etc."
+                    required={formData.status === 'visitor'}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <Clock size={16} />
+                    Valid Until
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="form-input"
+                    value={formData.validUntil}
+                    onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
 
             <div className="form-group">
               <label className="form-label">
@@ -1033,7 +1144,7 @@ const RegisterView = ({ setCurrentView }) => {
                 Cancel
               </button>
               <button type="submit" className="btn btn-primary">
-                Register User
+                Register Person
               </button>
             </div>
           </form>
@@ -1085,6 +1196,28 @@ const VerifyView = ({ setCurrentView }) => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      active: '#10b981',
+      graduate: '#3b82f6',
+      suspended: '#ef4444',
+      discontinued: '#f59e0b',
+      visitor: '#8b5cf6'
+    };
+    return colors[status] || '#64748b';
+  };
+
+  const getStatusMessage = (status) => {
+    const messages = {
+      active: 'ACTIVE - ACCESS GRANTED',
+      graduate: 'GRADUATE - CONDITIONAL ACCESS',
+      suspended: 'SUSPENDED - ACCESS DENIED',
+      discontinued: 'DISCONTINUED - ACCESS DENIED',
+      visitor: 'VISITOR - CONTROLLED ENTRY'
+    };
+    return messages[status] || 'UNKNOWN STATUS';
   };
 
   const verifyFace = async () => {
@@ -1149,20 +1282,34 @@ const VerifyView = ({ setCurrentView }) => {
       }
 
       if (bestMatch) {
+        // Check if visitor access is expired
+        let accessGranted = true;
+        if (bestMatch.status === 'visitor' && bestMatch.valid_until) {
+          const validUntil = new Date(bestMatch.valid_until);
+          if (validUntil < new Date()) {
+            accessGranted = false;
+          }
+        }
+
+        // Deny access for suspended/discontinued
+        if (bestMatch.status === 'suspended' || bestMatch.status === 'discontinued') {
+          accessGranted = false;
+        }
+
         await supabase.from('access_logs').insert([{
           user_id: bestMatch.id_number,
           name: bestMatch.name,
           role: bestMatch.role,
-          action: 'access_granted',
+          action: accessGranted ? 'access_granted' : 'access_denied',
           timestamp: new Date().toISOString(),
           confidence: (1 - bestDistance) * 100
         }]);
 
         setVerificationResult({
-          success: true,
+          success: accessGranted,
           user: bestMatch,
           confidence: ((1 - bestDistance) * 100).toFixed(1),
-          type: 'success'
+          type: accessGranted ? 'success' : 'error'
         });
 
         if (continuousMode) {
@@ -1202,8 +1349,8 @@ const VerifyView = ({ setCurrentView }) => {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Access Verification</h1>
-        <p className="page-subtitle">Scan face for instant entry authorization</p>
+        <h1 className="page-title">Campus Entry Verification</h1>
+        <p className="page-subtitle">Scan face to verify identity and check access status</p>
       </div>
 
       <div className="content-card">
@@ -1215,13 +1362,27 @@ const VerifyView = ({ setCurrentView }) => {
             <div className="verification-overlay">
               {verificationResult.success ? (
                 <>
-                  <CheckCircle className="result-icon" color="#10b981" />
+                  <CheckCircle className="result-icon" color={getStatusColor(verificationResult.user.status)} />
                   <div className="result-name">
                     {verificationResult.user.name}
                   </div>
                   <div className="result-role">
                     {verificationResult.user.role.toUpperCase()}
                   </div>
+                  <div 
+                    className="result-status" 
+                    style={{ 
+                      background: getStatusColor(verificationResult.user.status) + '20',
+                      color: getStatusColor(verificationResult.user.status)
+                    }}
+                  >
+                    {getStatusMessage(verificationResult.user.status)}
+                  </div>
+                  {verificationResult.user.status === 'visitor' && verificationResult.user.visit_purpose && (
+                    <div className="result-role">
+                      Purpose: {verificationResult.user.visit_purpose}
+                    </div>
+                  )}
                   <div className="result-confidence">
                     Confidence: {verificationResult.confidence}%
                   </div>
@@ -1249,7 +1410,7 @@ const VerifyView = ({ setCurrentView }) => {
             style={{ flex: 1 }}
           >
             <ScanFace size={16} />
-            {isVerifying ? 'Verifying...' : 'Verify Face'}
+            {isVerifying ? 'Verifying...' : 'Verify Entry'}
           </button>
 
           <label className="checkbox-label">
@@ -1277,7 +1438,14 @@ const VerifyView = ({ setCurrentView }) => {
 const DashboardView = ({ setCurrentView }) => {
   const [users, setUsers] = useState([]);
   const [accessLogs, setAccessLogs] = useState([]);
-  const [stats, setStats] = useState({ total: 0, students: 0, lecturers: 0, staff: 0 });
+  const [stats, setStats] = useState({ 
+    total: 0, 
+    active: 0, 
+    graduate: 0, 
+    suspended: 0, 
+    discontinued: 0, 
+    visitor: 0 
+  });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('users');
 
@@ -1296,15 +1464,19 @@ const DashboardView = ({ setCurrentView }) => {
 
       setUsers(usersData || []);
 
-      const studentCount = usersData?.filter(u => u.role === 'student').length || 0;
-      const lecturerCount = usersData?.filter(u => u.role === 'lecturer').length || 0;
-      const staffCount = usersData?.filter(u => u.role === 'staff').length || 0;
+      const activeCount = usersData?.filter(u => u.status === 'active').length || 0;
+      const graduateCount = usersData?.filter(u => u.status === 'graduate').length || 0;
+      const suspendedCount = usersData?.filter(u => u.status === 'suspended').length || 0;
+      const discontinuedCount = usersData?.filter(u => u.status === 'discontinued').length || 0;
+      const visitorCount = usersData?.filter(u => u.status === 'visitor').length || 0;
 
       setStats({
         total: usersData?.length || 0,
-        students: studentCount,
-        lecturers: lecturerCount,
-        staff: staffCount
+        active: activeCount,
+        graduate: graduateCount,
+        suspended: suspendedCount,
+        discontinued: discontinuedCount,
+        visitor: visitorCount
       });
 
       const { data: logsData, error: logsError } = await supabase
@@ -1325,7 +1497,7 @@ const DashboardView = ({ setCurrentView }) => {
   };
 
   const deleteUser = async (idNumber) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this person?')) return;
 
     try {
       const { error } = await supabase
@@ -1345,7 +1517,7 @@ const DashboardView = ({ setCurrentView }) => {
     <div>
       <div className="page-header">
         <h1 className="page-title">System Dashboard</h1>
-        <p className="page-subtitle">Monitor and manage your biometric access system</p>
+        <p className="page-subtitle">Monitor campus access and manage registered individuals</p>
       </div>
 
       {loading ? (
@@ -1358,19 +1530,27 @@ const DashboardView = ({ setCurrentView }) => {
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-value">{stats.total}</div>
-              <div className="stat-label">Total Users</div>
+              <div className="stat-label">Total Registered</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{stats.students}</div>
-              <div className="stat-label">Students</div>
+              <div className="stat-value">{stats.active}</div>
+              <div className="stat-label">Active</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{stats.lecturers}</div>
-              <div className="stat-label">Lecturers</div>
+              <div className="stat-value">{stats.graduate}</div>
+              <div className="stat-label">Graduates</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{stats.staff}</div>
-              <div className="stat-label">Support Staff</div>
+              <div className="stat-value">{stats.suspended}</div>
+              <div className="stat-label">Suspended</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.discontinued}</div>
+              <div className="stat-label">Discontinued</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{stats.visitor}</div>
+              <div className="stat-label">Visitors</div>
             </div>
           </div>
 
@@ -1379,7 +1559,7 @@ const DashboardView = ({ setCurrentView }) => {
               className={`tab ${activeTab === 'users' ? 'active' : ''}`}
               onClick={() => setActiveTab('users')}
             >
-              Registered Users
+              Registered Individuals
             </button>
             <button 
               className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
@@ -1394,7 +1574,7 @@ const DashboardView = ({ setCurrentView }) => {
               {users.length === 0 ? (
                 <div className="empty-state">
                   <Users className="empty-icon" />
-                  <p>No users registered yet</p>
+                  <p>No registered individuals yet</p>
                 </div>
               ) : (
                 <table className="table">
@@ -1402,7 +1582,8 @@ const DashboardView = ({ setCurrentView }) => {
                     <tr>
                       <th>Name</th>
                       <th>ID Number</th>
-                      <th>Role</th>
+                      <th>Category</th>
+                      <th>Status</th>
                       <th>Email</th>
                       <th>Registered</th>
                       <th>Actions</th>
@@ -1416,6 +1597,11 @@ const DashboardView = ({ setCurrentView }) => {
                         <td>
                           <span className={`badge badge-${user.role}`}>
                             {user.role}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge badge-${user.status}`}>
+                            {user.status}
                           </span>
                         </td>
                         <td>{user.email || '-'}</td>
@@ -1450,7 +1636,7 @@ const DashboardView = ({ setCurrentView }) => {
                     <tr>
                       <th>Name</th>
                       <th>ID Number</th>
-                      <th>Role</th>
+                      <th>Category</th>
                       <th>Action</th>
                       <th>Confidence</th>
                       <th>Timestamp</th>
