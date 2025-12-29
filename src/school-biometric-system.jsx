@@ -1,3 +1,13 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import * as faceapi from 'face-api.js';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText } from 'lucide-react';
+
+// Initialize Supabase client
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 
 // Main App Component
