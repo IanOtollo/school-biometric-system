@@ -5,7 +5,7 @@ import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, 
 
 // Initialize Supabase client
 const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
+  'https://invalid-url-error.supabase.co',
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
