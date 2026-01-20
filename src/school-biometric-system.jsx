@@ -1016,6 +1016,40 @@ const RegisterView = ({ setCurrentView }) => {
           <div className="camera-container">
             <video ref={videoRef} autoPlay muted />
             <canvas ref={canvasRef} />
+            
+            {/* Face Position Guide for Registration */}
+            {!capturedDescriptor && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '250px',
+                height: '320px',
+                border: '3px solid rgba(37, 99, 235, 0.8)',
+                borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                pointerEvents: 'none',
+                boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.4)',
+                transition: 'all 0.3s'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-50px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  background: 'rgba(37, 99, 235, 0.9)',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  whiteSpace: 'nowrap'
+                }}>
+                  Position your face in the oval
+                </div>
+              </div>
+            )}
           </div>
           <button 
             className="btn btn-primary" 
@@ -1265,7 +1299,7 @@ const VerifyView = ({ setCurrentView }) => {
         return;
       }
 
-      const threshold = 0.6;
+      const threshold = 0.7;
       let bestMatch = null;
       let bestDistance = 1;
 
@@ -1357,6 +1391,40 @@ const VerifyView = ({ setCurrentView }) => {
         <div className="camera-container">
           <video ref={videoRef} autoPlay muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
+          
+          {/* Face Position Guide for Verification */}
+          {!verificationResult && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '250px',
+              height: '320px',
+              border: '3px solid rgba(37, 99, 235, 0.8)',
+              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+              pointerEvents: 'none',
+              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.4)',
+              transition: 'all 0.3s'
+            }}>
+              <div style={{
+                position: 'absolute',
+                bottom: '-50px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: '600',
+                textAlign: 'center',
+                background: 'rgba(37, 99, 235, 0.9)',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                whiteSpace: 'nowrap'
+              }}>
+                Position your face in the oval
+              </div>
+            </div>
+          )}
           
           {verificationResult && (
             <div className="verification-overlay">
