@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
-import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText } from 'lucide-react';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle } from 'lucide-react';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -9,15 +9,17 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-
 // Main App Component
 const BiometricAccessSystem = () => {
   const [currentView, setCurrentView] = useState('home');
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const [showAlertPanel, setShowAlertPanel] = useState(false);
 
   useEffect(() => {
     loadModels();
+    loadAlerts();
   }, []);
 
   const loadModels = async () => {
@@ -32,6 +34,32 @@ const BiometricAccessSystem = () => {
     } catch (error) {
       console.error('Error loading models:', error);
     }
+  };
+
+  const loadAlerts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('access_logs')
+        .select('*')
+        .eq('action', 'access_denied')
+        .order('timestamp', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setAlerts(data || []);
+    } catch (error) {
+      console.error('Error loading alerts:', error);
+    }
+  };
+
+  const addAlert = (alertData) => {
+    setAlerts(prev => [alertData, ...prev]);
+    playAlertSound();
+  };
+
+  const playAlertSound = () => {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVKzn77BiFQU+ldf0yoIzBh1wxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU8kdfyzIIzBh1vxO/glUYLEFWs5++wYRQFPJHX9MyCMwYdb8Tv4JVGCxBVrOfvsGEUBTyR1/TMgjMGHW/E7+CVRgsQVazn77BhFAU=');
+    audio.play().catch(e => console.log('Audio play failed:', e));
   };
 
   return (
@@ -115,6 +143,89 @@ const BiometricAccessSystem = () => {
         .nav-buttons {
           display: flex;
           gap: 0.5rem;
+          align-items: center;
+        }
+
+        .alert-bell {
+          position: relative;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 0.5rem;
+          transition: background 0.2s;
+        }
+
+        .alert-bell:hover {
+          background: var(--background);
+        }
+
+        .alert-badge {
+          position: absolute;
+          top: 0.25rem;
+          right: 0.25rem;
+          background: var(--danger);
+          color: white;
+          border-radius: 9999px;
+          width: 18px;
+          height: 18px;
+          font-size: 0.625rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+        }
+
+        .alert-dropdown {
+          position: absolute;
+          top: 4rem;
+          right: 2rem;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          width: 400px;
+          max-height: 500px;
+          overflow-y: auto;
+          z-index: 200;
+        }
+
+        .alert-header {
+          padding: 1rem;
+          border-bottom: 1px solid var(--border);
+          font-weight: 600;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .alert-item {
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-light);
+        }
+
+        .alert-item:last-child {
+          border-bottom: none;
+        }
+
+        .alert-item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+          margin-bottom: 0.5rem;
+        }
+
+        .alert-item-name {
+          font-weight: 600;
+          color: var(--danger);
+        }
+
+        .alert-item-time {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+        }
+
+        .alert-item-body {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
         }
 
         .btn {
@@ -292,7 +403,7 @@ const BiometricAccessSystem = () => {
 
         .action-cards {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 1.5rem;
           margin-top: 2rem;
         }
@@ -720,6 +831,63 @@ const BiometricAccessSystem = () => {
           cursor: pointer;
         }
 
+        .monitor-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .live-feed {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          padding: 1.5rem;
+        }
+
+        .feed-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 1rem;
+          font-weight: 600;
+        }
+
+        .feed-header .live-indicator {
+          width: 8px;
+          height: 8px;
+          background: var(--danger);
+          border-radius: 50%;
+          animation: pulse 2s infinite;
+        }
+
+        .recent-activity {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          padding: 1.5rem;
+        }
+
+        .activity-list {
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        .activity-item {
+          padding: 0.75rem;
+          border-bottom: 1px solid var(--border-light);
+          font-size: 0.875rem;
+        }
+
+        .activity-item:last-child {
+          border-bottom: none;
+        }
+
+        .activity-time {
+          color: var(--text-secondary);
+          font-size: 0.75rem;
+        }
+
         @media (max-width: 768px) {
           .header {
             padding: 1rem;
@@ -748,6 +916,16 @@ const BiometricAccessSystem = () => {
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
           }
+
+          .monitor-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .alert-dropdown {
+            right: 1rem;
+            left: 1rem;
+            width: auto;
+          }
         }
       `}</style>
 
@@ -768,14 +946,66 @@ const BiometricAccessSystem = () => {
               </button>
               <button 
                 className="btn" 
+                onClick={() => setCurrentView('security')}
+              >
+                <Eye size={16} />
+                Security Monitor
+              </button>
+              <button 
+                className="btn" 
                 onClick={() => setCurrentView('dashboard')}
               >
                 <LayoutDashboard size={16} />
                 Dashboard
               </button>
+              <div className="alert-bell" onClick={() => setShowAlertPanel(!showAlertPanel)}>
+                <Bell size={20} color={alerts.length > 0 ? '#ef4444' : '#64748b'} />
+                {alerts.length > 0 && (
+                  <span className="alert-badge">{alerts.length}</span>
+                )}
+              </div>
             </nav>
           </div>
         </header>
+
+        {showAlertPanel && (
+          <div className="alert-dropdown">
+            <div className="alert-header">
+              <span>Security Alerts</span>
+              <button 
+                className="btn" 
+                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                onClick={() => setShowAlertPanel(false)}
+              >
+                Close
+              </button>
+            </div>
+            <div>
+              {alerts.length === 0 ? (
+                <div className="empty-state" style={{ padding: '2rem' }}>
+                  <p>No active alerts</p>
+                </div>
+              ) : (
+                alerts.map((alert, index) => (
+                  <div key={index} className="alert-item">
+                    <div className="alert-item-header">
+                      <span className="alert-item-name">
+                        <AlertTriangle size={14} style={{ display: 'inline', marginRight: '0.25rem' }} />
+                        {alert.name}
+                      </span>
+                      <span className="alert-item-time">
+                        {new Date(alert.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <div className="alert-item-body">
+                      Access denied - {alert.user_id}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         {modelsLoaded && (
           <div className="status-badge">
@@ -794,8 +1024,12 @@ const BiometricAccessSystem = () => {
             <HomeView setCurrentView={setCurrentView} />
           ) : currentView === 'register' ? (
             <RegisterView setCurrentView={setCurrentView} />
+          ) : currentView === 'visitor' ? (
+            <VisitorRegistrationView setCurrentView={setCurrentView} />
           ) : currentView === 'verify' ? (
-            <VerifyView setCurrentView={setCurrentView} />
+            <VerifyView setCurrentView={setCurrentView} addAlert={addAlert} />
+          ) : currentView === 'security' ? (
+            <SecurityMonitorView setCurrentView={setCurrentView} alerts={alerts} />
           ) : currentView === 'dashboard' ? (
             <DashboardView setCurrentView={setCurrentView} />
           ) : null}
@@ -834,9 +1068,19 @@ const HomeView = ({ setCurrentView }) => {
           <div className="card-icon">
             <UserPlus size={24} />
           </div>
-          <h3 className="card-title">Register Person</h3>
+          <h3 className="card-title">Register Student/Staff</h3>
           <p className="card-description">
-            Enroll students, staff, or register visitors with temporary access
+            Enroll students, lecturers, and staff members into the system
+          </p>
+        </div>
+
+        <div className="action-card" onClick={() => setCurrentView('visitor')}>
+          <div className="card-icon">
+            <UserCheck size={24} />
+          </div>
+          <h3 className="card-title">Register Visitor</h3>
+          <p className="card-description">
+            Register parents, guests, and temporary visitors with controlled entry
           </p>
         </div>
         
@@ -846,7 +1090,17 @@ const HomeView = ({ setCurrentView }) => {
           </div>
           <h3 className="card-title">Verify Entry</h3>
           <p className="card-description">
-            Scan face to verify identity and check status (Active, Graduate, Suspended, Visitor)
+            Scan face to verify identity and check status for gate access
+          </p>
+        </div>
+
+        <div className="action-card" onClick={() => setCurrentView('security')}>
+          <div className="card-icon">
+            <Eye size={24} />
+          </div>
+          <h3 className="card-title">Security Monitor</h3>
+          <p className="card-description">
+            Real-time monitoring of gate access and security alerts
           </p>
         </div>
         
@@ -864,7 +1118,7 @@ const HomeView = ({ setCurrentView }) => {
   );
 };
 
-// Register View Component
+// Register View Component (Students/Staff)
 const RegisterView = ({ setCurrentView }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -874,9 +1128,7 @@ const RegisterView = ({ setCurrentView }) => {
     idNumber: '',
     role: 'student',
     status: 'active',
-    email: '',
-    visitPurpose: '',
-    validUntil: ''
+    email: ''
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -951,11 +1203,6 @@ const RegisterView = ({ setCurrentView }) => {
       return;
     }
 
-    if (formData.status === 'visitor' && !formData.visitPurpose) {
-      setMessage({ type: 'error', text: 'Please specify visit purpose for visitors' });
-      return;
-    }
-
     try {
       setMessage({ type: 'info', text: 'Registering person...' });
 
@@ -968,8 +1215,8 @@ const RegisterView = ({ setCurrentView }) => {
             role: formData.role,
             status: formData.status,
             email: formData.email,
-            visit_purpose: formData.visitPurpose || null,
-            valid_until: formData.validUntil || null,
+            visit_purpose: null,
+            valid_until: null,
             face_descriptor: capturedDescriptor,
             registered_at: new Date().toISOString()
           }
@@ -998,8 +1245,8 @@ const RegisterView = ({ setCurrentView }) => {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Register New Person</h1>
-        <p className="page-subtitle">Enroll students, staff, or visitors into the campus access system</p>
+        <h1 className="page-title">Register Student/Staff</h1>
+        <p className="page-subtitle">Enroll students, lecturers, and staff into the campus access system</p>
       </div>
 
       {message.text && (
@@ -1018,7 +1265,6 @@ const RegisterView = ({ setCurrentView }) => {
             <video ref={videoRef} autoPlay muted />
             <canvas ref={canvasRef} />
             
-            {/* Face Position Guide for Registration */}
             {!capturedDescriptor && (
               <div style={{
                 position: 'absolute',
@@ -1126,40 +1372,8 @@ const RegisterView = ({ setCurrentView }) => {
                 <option value="graduate">Graduate</option>
                 <option value="suspended">Suspended</option>
                 <option value="discontinued">Discontinued</option>
-                <option value="visitor">Visitor</option>
               </select>
             </div>
-
-            {formData.status === 'visitor' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">
-                    <FileText size={16} />
-                    Visit Purpose *
-                  </label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.visitPurpose}
-                    onChange={(e) => setFormData({ ...formData, visitPurpose: e.target.value })}
-                    placeholder="e.g., Parent visiting student, Guest speaker, etc."
-                    required={formData.status === 'visitor'}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    <Clock size={16} />
-                    Valid Until
-                  </label>
-                  <input
-                    type="datetime-local"
-                    className="form-input"
-                    value={formData.validUntil}
-                    onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
 
             <div className="form-group">
               <label className="form-label">
@@ -1189,8 +1403,313 @@ const RegisterView = ({ setCurrentView }) => {
   );
 };
 
-// Verify View Component
-const VerifyView = ({ setCurrentView }) => {
+// NEW: Visitor Registration View
+const VisitorRegistrationView = ({ setCurrentView }) => {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [stream, setStream] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    idNumber: '',
+    phone: '',
+    visitPurpose: '',
+    validUntil: '',
+    hostName: ''
+  });
+  const [capturedDescriptor, setCapturedDescriptor] = useState(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    startCamera();
+    // Set default valid until (2 hours from now)
+    const twoHoursLater = new Date();
+    twoHoursLater.setHours(twoHoursLater.getHours() + 2);
+    setFormData(prev => ({
+      ...prev,
+      validUntil: twoHoursLater.toISOString().slice(0, 16)
+    }));
+    return () => stopCamera();
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: 'user' }
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Camera access denied' });
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const captureFace = async () => {
+    setIsCapturing(true);
+    setMessage({ type: 'info', text: 'Analyzing face...' });
+
+    try {
+      const detections = await faceapi
+        .detectSingleFace(videoRef.current)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (detections) {
+        setCapturedDescriptor(Array.from(detections.descriptor));
+        setMessage({ type: 'success', text: 'Face captured successfully!' });
+        
+        const canvas = canvasRef.current;
+        const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
+        faceapi.matchDimensions(canvas, displaySize);
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        faceapi.draw.drawDetections(canvas, resizedDetections);
+        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      } else {
+        setMessage({ type: 'error', text: 'No face detected. Please position your face clearly.' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error capturing face' });
+    }
+
+    setIsCapturing(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!capturedDescriptor) {
+      setMessage({ type: 'error', text: 'Please capture visitor face first' });
+      return;
+    }
+
+    if (!formData.name || !formData.visitPurpose) {
+      setMessage({ type: 'error', text: 'Please fill all required fields' });
+      return;
+    }
+
+    try {
+      setMessage({ type: 'info', text: 'Registering visitor...' });
+
+      // Generate visitor ID
+      const visitorId = 'V-' + Date.now();
+
+      const { data, error } = await supabase
+        .from('users')
+        .insert([
+          {
+            name: formData.name,
+            id_number: formData.idNumber || visitorId,
+            role: 'visitor',
+            status: 'visitor',
+            email: formData.phone,
+            visit_purpose: formData.visitPurpose + (formData.hostName ? ` | Host: ${formData.hostName}` : ''),
+            valid_until: formData.validUntil || null,
+            face_descriptor: capturedDescriptor,
+            registered_at: new Date().toISOString()
+          }
+        ]);
+
+      if (error) throw error;
+
+      setMessage({ type: 'success', text: 'Visitor registered successfully! Temporary access granted.' });
+      
+      await supabase.from('access_logs').insert([{
+        user_id: formData.idNumber || visitorId,
+        name: formData.name,
+        action: 'visitor_registered',
+        timestamp: new Date().toISOString()
+      }]);
+
+      setTimeout(() => {
+        setCurrentView('home');
+      }, 2000);
+
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message || 'Registration failed' });
+    }
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <h1 className="page-title">Register Visitor</h1>
+        <p className="page-subtitle">Register parents, guests, and temporary visitors with controlled entry</p>
+      </div>
+
+      {message.text && (
+        <div className={`alert alert-${message.type}`}>
+          {message.type === 'success' && <CheckCircle />}
+          {message.type === 'error' && <XCircle />}
+          {message.type === 'info' && <AlertCircle />}
+          {message.text}
+        </div>
+      )}
+
+      <div className="form-grid">
+        <div className="content-card">
+          <h3 className="card-header">Visitor Face Capture</h3>
+          <div className="camera-container">
+            <video ref={videoRef} autoPlay muted />
+            <canvas ref={canvasRef} />
+            
+            {!capturedDescriptor && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '250px',
+                height: '320px',
+                border: '3px solid rgba(139, 92, 246, 0.8)',
+                borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                pointerEvents: 'none',
+                boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.4)',
+                transition: 'all 0.3s'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-50px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  background: 'rgba(139, 92, 246, 0.9)',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  whiteSpace: 'nowrap'
+                }}>
+                  Position visitor face in the oval
+                </div>
+              </div>
+            )}
+          </div>
+          <button 
+            className="btn btn-primary" 
+            onClick={captureFace}
+            disabled={isCapturing}
+            style={{ width: '100%' }}
+          >
+            <Camera size={16} />
+            {isCapturing ? 'Capturing...' : capturedDescriptor ? 'Recapture Face' : 'Capture Visitor Face'}
+          </button>
+        </div>
+
+        <div className="content-card">
+          <h3 className="card-header">Visitor Details</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">
+                <User size={16} />
+                Full Name *
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g., John Doe"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <Hash size={16} />
+                ID/Passport Number
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Optional"
+                value={formData.idNumber}
+                onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <Mail size={16} />
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="e.g., +254 700 000000"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <FileText size={16} />
+                Purpose of Visit *
+              </label>
+              <textarea
+                className="form-textarea"
+                placeholder="e.g., Parent visiting student, Guest speaker, Delivery, etc."
+                value={formData.visitPurpose}
+                onChange={(e) => setFormData({ ...formData, visitPurpose: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <User size={16} />
+                Person/Department to Visit
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g., Dr. Jane Smith / IT Department"
+                value={formData.hostName}
+                onChange={(e) => setFormData({ ...formData, hostName: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <Clock size={16} />
+                Access Valid Until *
+              </label>
+              <input
+                type="datetime-local"
+                className="form-input"
+                value={formData.validUntil}
+                onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="button-group">
+              <button type="button" className="btn" onClick={() => setCurrentView('home')}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Register Visitor
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Verify View Component (with Alert Integration)
+const VerifyView = ({ setCurrentView, addAlert }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
@@ -1317,8 +1836,9 @@ const VerifyView = ({ setCurrentView }) => {
       }
 
       if (bestMatch) {
-        // Check if visitor access is expired
         let accessGranted = true;
+        
+        // Check visitor expiry
         if (bestMatch.status === 'visitor' && bestMatch.valid_until) {
           const validUntil = new Date(bestMatch.valid_until);
           if (validUntil < new Date()) {
@@ -1329,6 +1849,17 @@ const VerifyView = ({ setCurrentView }) => {
         // Deny access for suspended/discontinued
         if (bestMatch.status === 'suspended' || bestMatch.status === 'discontinued') {
           accessGranted = false;
+          
+          // Create alert for restricted access
+          const alertData = {
+            user_id: bestMatch.id_number,
+            name: bestMatch.name,
+            role: bestMatch.role,
+            action: 'access_denied',
+            timestamp: new Date().toISOString()
+          };
+          
+          addAlert(alertData);
         }
 
         await supabase.from('access_logs').insert([{
@@ -1393,7 +1924,6 @@ const VerifyView = ({ setCurrentView }) => {
           <video ref={videoRef} autoPlay muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
           
-          {/* Face Position Guide for Verification */}
           {!verificationResult && (
             <div style={{
               position: 'absolute',
@@ -1499,6 +2029,180 @@ const VerifyView = ({ setCurrentView }) => {
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+// NEW: Security Monitor View
+const SecurityMonitorView = ({ setCurrentView, alerts }) => {
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [stats, setStats] = useState({
+    entriesToday: 0,
+    activeAlerts: 0,
+    visitorsToday: 0,
+    deniedToday: 0
+  });
+
+  useEffect(() => {
+    fetchRecentActivity();
+    const interval = setInterval(fetchRecentActivity, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchRecentActivity = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { data: logs, error } = await supabase
+        .from('access_logs')
+        .select('*')
+        .gte('timestamp', today.toISOString())
+        .order('timestamp', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      setRecentActivity(logs || []);
+
+      // Calculate stats
+      const granted = logs?.filter(l => l.action === 'access_granted').length || 0;
+      const denied = logs?.filter(l => l.action === 'access_denied').length || 0;
+      const visitors = logs?.filter(l => l.action === 'visitor_registered').length || 0;
+
+      setStats({
+        entriesToday: granted,
+        activeAlerts: alerts.length,
+        visitorsToday: visitors,
+        deniedToday: denied
+      });
+
+    } catch (error) {
+      console.error('Error fetching activity:', error);
+    }
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <h1 className="page-title">Security Personnel Monitor</h1>
+        <p className="page-subtitle">Real-time monitoring of gate access and security alerts</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-value">{stats.entriesToday}</div>
+          <div className="stat-label">Entries Today</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value" style={{ color: 'var(--danger)' }}>{stats.activeAlerts}</div>
+          <div className="stat-label">Active Alerts</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{stats.visitorsToday}</div>
+          <div className="stat-label">Visitors Today</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{stats.deniedToday}</div>
+          <div className="stat-label">Access Denied</div>
+        </div>
+      </div>
+
+      <div className="monitor-grid">
+        <div className="live-feed">
+          <div className="feed-header">
+            <span className="live-indicator"></span>
+            <span>Live Gate Monitor</span>
+          </div>
+          <div style={{ 
+            background: '#000', 
+            borderRadius: '0.5rem', 
+            aspectRatio: '16/9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '0.875rem'
+          }}>
+            <Activity size={48} color="#64748b" />
+          </div>
+          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+            <button className="btn btn-primary" onClick={() => setCurrentView('verify')}>
+              <ScanFace size={16} />
+              Start Verification
+            </button>
+            <button className="btn" onClick={() => setCurrentView('visitor')}>
+              <UserCheck size={16} />
+              Register Visitor
+            </button>
+          </div>
+        </div>
+
+        <div className="recent-activity">
+          <div className="card-header">Recent Activity</div>
+          <div className="activity-list">
+            {recentActivity.length === 0 ? (
+              <div className="empty-state">
+                <p>No recent activity</p>
+              </div>
+            ) : (
+              recentActivity.map((activity, index) => (
+                <div key={index} className="activity-item">
+                  <div style={{ fontWeight: '500', marginBottom: '0.25rem' }}>
+                    {activity.name}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    <span className={`badge badge-${
+                      activity.action === 'access_granted' ? 'success' : 
+                      activity.action === 'access_denied' ? 'danger' : 'info'
+                    }`} style={{ marginRight: '0.5rem' }}>
+                      {activity.action.replace('_', ' ')}
+                    </span>
+                    <span className="activity-time">
+                      {new Date(activity.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {alerts.length > 0 && (
+        <div className="content-card" style={{ border: '2px solid var(--danger)' }}>
+          <div className="card-header" style={{ color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <AlertTriangle size={20} />
+            Active Security Alerts ({alerts.length})
+          </div>
+          <div className="data-table">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>ID Number</th>
+                  <th>Time</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {alerts.slice(0, 5).map((alert, index) => (
+                  <tr key={index}>
+                    <td style={{ fontWeight: '600', color: 'var(--danger)' }}>{alert.name}</td>
+                    <td>{alert.user_id}</td>
+                    <td>{new Date(alert.timestamp).toLocaleString()}</td>
+                    <td>
+                      <span className="badge badge-danger">
+                        {alert.action.replace('_', ' ')}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1653,7 +2357,7 @@ const DashboardView = ({ setCurrentView }) => {
                       <th>ID Number</th>
                       <th>Category</th>
                       <th>Status</th>
-                      <th>Email</th>
+                      <th>Email/Phone</th>
                       <th>Registered</th>
                       <th>Actions</th>
                     </tr>
