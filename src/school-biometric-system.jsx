@@ -1036,11 +1036,10 @@ const BiometricAccessSystem = () => {
         </main>
 
         <footer className="footer">
-          <div className="footer-content">
-            © {new Date().getFullYear()} <a href="https://ianotollo.vercel.app" target="_blank" rel="noopener noreferrer" className="footer-link">Ian Otollo</a>. All rights reserved.
-          </div>
-        </footer>
-      </div>
+  <div className="footer-content">
+    © {new Date().getFullYear()}. All rights reserved.
+  </div>
+</footer>
 
       {loading && (
         <div className="loading-overlay">
