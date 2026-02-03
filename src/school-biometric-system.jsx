@@ -1047,7 +1047,8 @@ const BiometricAccessSystem = () => {
           <div className="loading-text">Processing...</div>
         </div>
       )}
-    </div>
+      </div>   ← closes <div className="content">
+    </div>     ← closes <div className="app-container">
   );
 };
 
