@@ -304,18 +304,6 @@ const BiometricAccessSystem = () => {
           color: var(--text-secondary);
         }
 
-        .footer-link {
-          color: var(--primary);
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.2s;
-        }
-
-        .footer-link:hover {
-          color: var(--primary-dark);
-          text-decoration: underline;
-        }
-
         .loading-overlay {
           position: fixed;
           top: 0;
@@ -937,24 +925,15 @@ const BiometricAccessSystem = () => {
               <span>Campus Gate Access System</span>
             </div>
             <nav className="nav-buttons">
-              <button 
-                className="btn" 
-                onClick={() => setCurrentView('home')}
-              >
+              <button className="btn" onClick={() => setCurrentView('home')}>
                 <Home size={16} />
                 Home
               </button>
-              <button 
-                className="btn" 
-                onClick={() => setCurrentView('security')}
-              >
+              <button className="btn" onClick={() => setCurrentView('security')}>
                 <Eye size={16} />
                 Security Monitor
               </button>
-              <button 
-                className="btn" 
-                onClick={() => setCurrentView('dashboard')}
-              >
+              <button className="btn" onClick={() => setCurrentView('dashboard')}>
                 <LayoutDashboard size={16} />
                 Dashboard
               </button>
@@ -972,8 +951,8 @@ const BiometricAccessSystem = () => {
           <div className="alert-dropdown">
             <div className="alert-header">
               <span>Security Alerts</span>
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
                 onClick={() => setShowAlertPanel(false)}
               >
@@ -1036,19 +1015,19 @@ const BiometricAccessSystem = () => {
         </main>
 
         <footer className="footer">
-  <div className="footer-content">
-    © {new Date().getFullYear()}. All rights reserved.
-  </div>
-</footer>
+          <div className="footer-content">
+            © {new Date().getFullYear()}. All rights reserved.
+          </div>
+        </footer>
 
-      {loading && (
-        <div className="loading-overlay">
-          <div className="spinner"></div>
-          <div className="loading-text">Processing...</div>
-        </div>
-      )}
-      </div>   ← closes <div className="content">
-    </div>     ← closes <div className="app-container">
+        {loading && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+            <div className="loading-text">Processing...</div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -1062,7 +1041,7 @@ const HomeView = ({ setCurrentView }) => {
           Automated facial recognition system for campus entry management with status verification
         </p>
       </div>
-      
+
       <div className="action-cards">
         <div className="action-card" onClick={() => setCurrentView('register')}>
           <div className="card-icon">
@@ -1083,7 +1062,7 @@ const HomeView = ({ setCurrentView }) => {
             Register parents, guests, and temporary visitors with controlled entry
           </p>
         </div>
-        
+
         <div className="action-card" onClick={() => setCurrentView('verify')}>
           <div className="card-icon">
             <ScanFace size={24} />
@@ -1103,7 +1082,7 @@ const HomeView = ({ setCurrentView }) => {
             Real-time monitoring of gate access and security alerts
           </p>
         </div>
-        
+
         <div className="action-card" onClick={() => setCurrentView('dashboard')}>
           <div className="card-icon">
             <LayoutDashboard size={24} />
@@ -1172,7 +1151,7 @@ const RegisterView = ({ setCurrentView }) => {
       if (detections) {
         setCapturedDescriptor(Array.from(detections.descriptor));
         setMessage({ type: 'success', text: 'Face captured successfully!' });
-        
+
         const canvas = canvasRef.current;
         const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
         faceapi.matchDimensions(canvas, displaySize);
@@ -1225,7 +1204,7 @@ const RegisterView = ({ setCurrentView }) => {
       if (error) throw error;
 
       setMessage({ type: 'success', text: 'Registration successful!' });
-      
+
       await supabase.from('access_logs').insert([{
         user_id: formData.idNumber,
         name: formData.name,
@@ -1264,7 +1243,7 @@ const RegisterView = ({ setCurrentView }) => {
           <div className="camera-container">
             <video ref={videoRef} autoPlay muted />
             <canvas ref={canvasRef} />
-            
+
             {!capturedDescriptor && (
               <div style={{
                 position: 'absolute',
@@ -1298,8 +1277,8 @@ const RegisterView = ({ setCurrentView }) => {
               </div>
             )}
           </div>
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             onClick={captureFace}
             disabled={isCapturing}
             style={{ width: '100%' }}
@@ -1403,7 +1382,7 @@ const RegisterView = ({ setCurrentView }) => {
   );
 };
 
-// NEW: Visitor Registration View
+// Visitor Registration View
 const VisitorRegistrationView = ({ setCurrentView }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -1422,7 +1401,6 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
 
   useEffect(() => {
     startCamera();
-    // Set default valid until (2 hours from now)
     const twoHoursLater = new Date();
     twoHoursLater.setHours(twoHoursLater.getHours() + 2);
     setFormData(prev => ({
@@ -1465,7 +1443,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
       if (detections) {
         setCapturedDescriptor(Array.from(detections.descriptor));
         setMessage({ type: 'success', text: 'Face captured successfully!' });
-        
+
         const canvas = canvasRef.current;
         const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
         faceapi.matchDimensions(canvas, displaySize);
@@ -1499,7 +1477,6 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
     try {
       setMessage({ type: 'info', text: 'Registering visitor...' });
 
-      // Generate visitor ID
       const visitorId = 'V-' + Date.now();
 
       const { data, error } = await supabase
@@ -1521,7 +1498,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
       if (error) throw error;
 
       setMessage({ type: 'success', text: 'Visitor registered successfully! Temporary access granted.' });
-      
+
       await supabase.from('access_logs').insert([{
         user_id: formData.idNumber || visitorId,
         name: formData.name,
@@ -1560,7 +1537,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
           <div className="camera-container">
             <video ref={videoRef} autoPlay muted />
             <canvas ref={canvasRef} />
-            
+
             {!capturedDescriptor && (
               <div style={{
                 position: 'absolute',
@@ -1594,8 +1571,8 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
               </div>
             )}
           </div>
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             onClick={captureFace}
             disabled={isCapturing}
             style={{ width: '100%' }}
@@ -1708,7 +1685,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
   );
 };
 
-// Verify View Component (with Alert Integration)
+// Verify View Component
 const VerifyView = ({ setCurrentView, addAlert }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -1776,7 +1753,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
 
   const verifyFace = async () => {
     if (isVerifying) return;
-    
+
     setIsVerifying(true);
     setVerificationResult(null);
 
@@ -1827,7 +1804,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
         if (user.face_descriptor) {
           const descriptor = new Float32Array(user.face_descriptor);
           const distance = faceapi.euclideanDistance(detections.descriptor, descriptor);
-          
+
           if (distance < threshold && distance < bestDistance) {
             bestDistance = distance;
             bestMatch = user;
@@ -1837,7 +1814,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
 
       if (bestMatch) {
         let accessGranted = true;
-        
+
         // Check visitor expiry
         if (bestMatch.status === 'visitor' && bestMatch.valid_until) {
           const validUntil = new Date(bestMatch.valid_until);
@@ -1849,8 +1826,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
         // Deny access for suspended/discontinued
         if (bestMatch.status === 'suspended' || bestMatch.status === 'discontinued') {
           accessGranted = false;
-          
-          // Create alert for restricted access
+
           const alertData = {
             user_id: bestMatch.id_number,
             name: bestMatch.name,
@@ -1858,7 +1834,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
             action: 'access_denied',
             timestamp: new Date().toISOString()
           };
-          
+
           addAlert(alertData);
         }
 
@@ -1923,7 +1899,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
         <div className="camera-container">
           <video ref={videoRef} autoPlay muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
-          
+
           {!verificationResult && (
             <div style={{
               position: 'absolute',
@@ -1956,7 +1932,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
               </div>
             </div>
           )}
-          
+
           {verificationResult && (
             <div className="verification-overlay">
               {verificationResult.success ? (
@@ -1968,9 +1944,9 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
                   <div className="result-role">
                     {verificationResult.user.role.toUpperCase()}
                   </div>
-                  <div 
-                    className="result-status" 
-                    style={{ 
+                  <div
+                    className="result-status"
+                    style={{
                       background: getStatusColor(verificationResult.user.status) + '20',
                       color: getStatusColor(verificationResult.user.status)
                     }}
@@ -1993,7 +1969,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
                     Access Denied
                   </div>
                   <div className="result-role">
-                    {verificationResult.message}
+                    {verificationResult.message || (verificationResult.user ? getStatusMessage(verificationResult.user.status) : 'Unknown')}
                   </div>
                 </>
               )}
@@ -2002,8 +1978,8 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
         </div>
 
         <div className="controls">
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             onClick={verifyFace}
             disabled={isVerifying || continuousMode}
             style={{ flex: 1 }}
@@ -2021,10 +1997,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
             <span>Continuous Mode</span>
           </label>
 
-          <button 
-            className="btn" 
-            onClick={() => setCurrentView('home')}
-          >
+          <button className="btn" onClick={() => setCurrentView('home')}>
             Back to Home
           </button>
         </div>
@@ -2033,7 +2006,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
   );
 };
 
-// NEW: Security Monitor View
+// Security Monitor View
 const SecurityMonitorView = ({ setCurrentView, alerts }) => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [stats, setStats] = useState({
@@ -2045,7 +2018,7 @@ const SecurityMonitorView = ({ setCurrentView, alerts }) => {
 
   useEffect(() => {
     fetchRecentActivity();
-    const interval = setInterval(fetchRecentActivity, 5000); // Refresh every 5 seconds
+    const interval = setInterval(fetchRecentActivity, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -2065,7 +2038,6 @@ const SecurityMonitorView = ({ setCurrentView, alerts }) => {
 
       setRecentActivity(logs || []);
 
-      // Calculate stats
       const granted = logs?.filter(l => l.action === 'access_granted').length || 0;
       const denied = logs?.filter(l => l.action === 'access_denied').length || 0;
       const visitors = logs?.filter(l => l.action === 'visitor_registered').length || 0;
@@ -2114,9 +2086,9 @@ const SecurityMonitorView = ({ setCurrentView, alerts }) => {
             <span className="live-indicator"></span>
             <span>Live Gate Monitor</span>
           </div>
-          <div style={{ 
-            background: '#000', 
-            borderRadius: '0.5rem', 
+          <div style={{
+            background: '#000',
+            borderRadius: '0.5rem',
             aspectRatio: '16/9',
             display: 'flex',
             alignItems: 'center',
@@ -2153,7 +2125,7 @@ const SecurityMonitorView = ({ setCurrentView, alerts }) => {
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                     <span className={`badge badge-${
-                      activity.action === 'access_granted' ? 'success' : 
+                      activity.action === 'access_granted' ? 'success' :
                       activity.action === 'access_denied' ? 'danger' : 'info'
                     }`} style={{ marginRight: '0.5rem' }}>
                       {activity.action.replace('_', ' ')}
@@ -2211,13 +2183,13 @@ const SecurityMonitorView = ({ setCurrentView, alerts }) => {
 const DashboardView = ({ setCurrentView }) => {
   const [users, setUsers] = useState([]);
   const [accessLogs, setAccessLogs] = useState([]);
-  const [stats, setStats] = useState({ 
-    total: 0, 
-    active: 0, 
-    graduate: 0, 
-    suspended: 0, 
-    discontinued: 0, 
-    visitor: 0 
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    graduate: 0,
+    suspended: 0,
+    discontinued: 0,
+    visitor: 0
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('users');
@@ -2328,13 +2300,13 @@ const DashboardView = ({ setCurrentView }) => {
           </div>
 
           <div className="tabs">
-            <button 
+            <button
               className={`tab ${activeTab === 'users' ? 'active' : ''}`}
               onClick={() => setActiveTab('users')}
             >
               Registered Individuals
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
               onClick={() => setActiveTab('logs')}
             >
@@ -2380,7 +2352,7 @@ const DashboardView = ({ setCurrentView }) => {
                         <td>{user.email || '-'}</td>
                         <td>{new Date(user.registered_at).toLocaleDateString()}</td>
                         <td>
-                          <button 
+                          <button
                             className="btn btn-danger"
                             onClick={() => deleteUser(user.id_number)}
                             style={{ padding: '0.375rem 0.75rem' }}
@@ -2429,7 +2401,7 @@ const DashboardView = ({ setCurrentView }) => {
                         </td>
                         <td>
                           <span className={`badge badge-${
-                            log.action === 'access_granted' ? 'success' : 
+                            log.action === 'access_granted' ? 'success' :
                             log.action === 'access_denied' ? 'danger' : 'info'
                           }`}>
                             {log.action.replace('_', ' ')}
