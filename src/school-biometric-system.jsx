@@ -9,6 +9,26 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
+// Helper for resilient Supabase fetching
+const fetchWithRetry = async (fetchFn, retries = 3, delay = 1000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const result = await fetchFn();
+      if (result.error) throw result.error;
+      return result.data;
+    } catch (error) {
+      const isNetworkError = error.message?.includes('fetch') ||
+        error.message?.includes('network') ||
+        !error.status;
+
+      if (i === retries - 1 || !isNetworkError) throw error;
+
+      console.warn(`Fetch failed, retrying (${i + 1}/${retries})...`, error.message);
+      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i))); // Exponential backoff
+    }
+  }
+};
+
 // Main App Component
 const BiometricAccessSystem = () => {
   const [currentView, setCurrentView] = useState('home');
@@ -39,17 +59,17 @@ const BiometricAccessSystem = () => {
 
   const loadAlerts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('access_logs')
-        .select('*')
-        .eq('action', 'access_denied')
-        .order('timestamp', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
+      const data = await fetchWithRetry(() =>
+        supabase
+          .from('access_logs')
+          .select('*')
+          .eq('action', 'access_denied')
+          .order('timestamp', { ascending: false })
+          .limit(10)
+      );
       setAlerts(data || []);
     } catch (error) {
-      console.error('Error loading alerts:', error);
+      console.error('Resilience Error (loadAlerts):', error);
     }
   };
 
@@ -2211,13 +2231,14 @@ const DashboardView = ({ setCurrentView }) => {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('*')
-        .order('registered_at', { ascending: false });
-
-      if (usersError) throw usersError;
+      const usersData = await fetchWithRetry(() =>
+        supabase
+          .from('users')
+          .select('*')
+          .order('registered_at', { ascending: false })
+      );
 
       setUsers(usersData || []);
 
@@ -2236,18 +2257,18 @@ const DashboardView = ({ setCurrentView }) => {
         visitor: visitorCount
       });
 
-      const { data: logsData, error: logsError } = await supabase
-        .from('access_logs')
-        .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(50);
-
-      if (logsError) throw logsError;
+      const logsData = await fetchWithRetry(() =>
+        supabase
+          .from('access_logs')
+          .select('*')
+          .order('timestamp', { ascending: false })
+          .limit(50)
+      );
 
       setAccessLogs(logsData || []);
 
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Resilience Error (fetchData):', error);
     } finally {
       setLoading(false);
     }
