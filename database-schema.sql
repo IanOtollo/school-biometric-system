@@ -55,22 +55,28 @@ ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY;
 -- These policies allow all operations - you should restrict in production
 
 -- Users table policies
+DROP POLICY IF EXISTS "Enable read access for all users" ON users;
 CREATE POLICY "Enable read access for all users" ON users
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Enable insert for all users" ON users;
 CREATE POLICY "Enable insert for all users" ON users
     FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Enable update for all users" ON users;
 CREATE POLICY "Enable update for all users" ON users
     FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Enable delete for all users" ON users;
 CREATE POLICY "Enable delete for all users" ON users
     FOR DELETE USING (true);
 
 -- Access logs policies
+DROP POLICY IF EXISTS "Enable read access for all access logs" ON access_logs;
 CREATE POLICY "Enable read access for all access logs" ON access_logs
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Enable insert for all access logs" ON access_logs;
 CREATE POLICY "Enable insert for all access logs" ON access_logs
     FOR INSERT WITH CHECK (true);
 

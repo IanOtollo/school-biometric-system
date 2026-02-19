@@ -24,8 +24,9 @@ const BiometricAccessSystem = () => {
 
   const loadModels = async () => {
     try {
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+      const MODEL_URL = '/models';
       await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), // Faster for real-time
         faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
@@ -1143,8 +1144,12 @@ const RegisterView = ({ setCurrentView }) => {
     setMessage({ type: 'info', text: 'Analyzing face...' });
 
     try {
+      // Use TinyFaceDetector for faster performance
       const detections = await faceapi
-        .detectSingleFace(videoRef.current)
+        .detectSingleFace(
+          videoRef.current,
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 })
+        )
         .withFaceLandmarks()
         .withFaceDescriptor();
 
@@ -1435,8 +1440,12 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
     setMessage({ type: 'info', text: 'Analyzing face...' });
 
     try {
+      // Use TinyFaceDetector for faster performance
       const detections = await faceapi
-        .detectSingleFace(videoRef.current)
+        .detectSingleFace(
+          videoRef.current,
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 })
+        )
         .withFaceLandmarks()
         .withFaceDescriptor();
 
@@ -1758,8 +1767,12 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
     setVerificationResult(null);
 
     try {
+      // Use TinyFaceDetector for faster performance
       const detections = await faceapi
-        .detectSingleFace(videoRef.current)
+        .detectSingleFace(
+          videoRef.current,
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 })
+        )
         .withFaceLandmarks()
         .withFaceDescriptor();
 
@@ -2124,10 +2137,9 @@ const SecurityMonitorView = ({ setCurrentView, alerts }) => {
                     {activity.name}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    <span className={`badge badge-${
-                      activity.action === 'access_granted' ? 'success' :
+                    <span className={`badge badge-${activity.action === 'access_granted' ? 'success' :
                       activity.action === 'access_denied' ? 'danger' : 'info'
-                    }`} style={{ marginRight: '0.5rem' }}>
+                      }`} style={{ marginRight: '0.5rem' }}>
                       {activity.action.replace('_', ' ')}
                     </span>
                     <span className="activity-time">
@@ -2400,10 +2412,9 @@ const DashboardView = ({ setCurrentView }) => {
                           ) : '-'}
                         </td>
                         <td>
-                          <span className={`badge badge-${
-                            log.action === 'access_granted' ? 'success' :
+                          <span className={`badge badge-${log.action === 'access_granted' ? 'success' :
                             log.action === 'access_denied' ? 'danger' : 'info'
-                          }`}>
+                            }`}>
                             {log.action.replace('_', ' ')}
                           </span>
                         </td>
