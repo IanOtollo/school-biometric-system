@@ -38,10 +38,6 @@ lerna-debug.log*
 # Vite
 .vite/
 
-# Face API Models (large files - document download process instead)
-# public/models/*.bin
-# public/models/*-shard*
-
 # Environment variables
 .env
 .env.local
