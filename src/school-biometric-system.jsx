@@ -29,6 +29,31 @@ const fetchWithRetry = async (fetchFn, retries = 3, delay = 1000) => {
   }
 };
 
+// Helper for resilient face detection (Scanning Loop)
+const detectFaceWithRetry = async (videoEl, maxTimeMs = 5000) => {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxTimeMs) {
+    // We use SsdMobilenetv1 for higher accuracy than TinyFaceDetector
+    const detections = await faceapi
+      .detectSingleFace(
+        videoEl,
+        new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
+      )
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (detections) {
+      return detections; // Found a good face!
+    }
+
+    // Wait a tiny bit before scanning the next frame so we don't freeze the UI completely
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  return null; // Time ran out
+};
+
 // Main App Component
 const BiometricAccessSystem = () => {
   const [currentView, setCurrentView] = useState('home');
@@ -1164,14 +1189,9 @@ const RegisterView = ({ setCurrentView }) => {
     setMessage({ type: 'info', text: 'Analyzing face...' });
 
     try {
-      // Use TinyFaceDetector for faster performance
-      const detections = await faceapi
-        .detectSingleFace(
-          videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 })
-        )
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      // Use resilient scanning loop
+      setMessage({ type: 'info', text: 'Analyzing face... Please stay still.' });
+      const detections = await detectFaceWithRetry(videoRef.current);
 
       if (detections) {
         setCapturedDescriptor(Array.from(detections.descriptor));
@@ -1460,14 +1480,9 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
     setMessage({ type: 'info', text: 'Analyzing face...' });
 
     try {
-      // Use TinyFaceDetector for faster performance
-      const detections = await faceapi
-        .detectSingleFace(
-          videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 })
-        )
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      // Use resilient scanning loop
+      setMessage({ type: 'info', text: 'Analyzing face... Please stay still.' });
+      const detections = await detectFaceWithRetry(videoRef.current);
 
       if (detections) {
         setCapturedDescriptor(Array.from(detections.descriptor));
@@ -1787,19 +1802,13 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
     setVerificationResult(null);
 
     try {
-      // Use TinyFaceDetector for faster performance
-      const detections = await faceapi
-        .detectSingleFace(
-          videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 })
-        )
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      // Use resilient scanning loop
+      const detections = await detectFaceWithRetry(videoRef.current, 5000);
 
       if (!detections) {
         setVerificationResult({
           success: false,
-          message: 'No face detected',
+          message: 'No face detected or timed out. Please try again.',
           type: 'warning'
         });
         setIsVerifying(false);
