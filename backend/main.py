@@ -54,7 +54,8 @@ class FaceVerificationEngine:
             logger.info(f"Targeting: {expected_height}x{expected_width}, NCHW: {is_nchw}")
             
             resized = cv2.resize(image_cv, (expected_width, expected_height))
-            normalized = resized.astype(np.float32) / 255.0
+            # ArcFace standard normalization: (pixel - 127.5) / 128.0
+            normalized = (resized.astype(np.float32) - 127.5) / 128.0
             
             if is_nchw:
                 data = np.transpose(normalized, (2, 0, 1))

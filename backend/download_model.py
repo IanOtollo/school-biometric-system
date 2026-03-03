@@ -8,7 +8,9 @@ import os
 import sys
 import requests
 
-MODEL_URL = os.environ.get('MODEL_URL', '').strip().replace('\n', '').replace('\r', '')
+# Default fallback: a working ArcFace ONNX model on Hugging Face
+DEFAULT_MODEL_URL = 'https://huggingface.co/garavv/arcface-onnx/resolve/main/arc.onnx?download=true'
+MODEL_URL = os.environ.get('MODEL_URL', DEFAULT_MODEL_URL).strip().replace('\n', '').replace('\r', '')
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'arcface.onnx')
 
 def download_model():
@@ -28,7 +30,7 @@ def download_model():
             print(f"Existing model file is too small ({file_size} bytes). Overwriting...")
 
     if not MODEL_URL:
-        print("ERROR: MODEL_URL env variable not set and model not found locally.")
+        print("ERROR: MODEL_URL env variable not set and no fallback available.")
         return False
 
     print(f"Downloading model from {MODEL_URL} ...")
