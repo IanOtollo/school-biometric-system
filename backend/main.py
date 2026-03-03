@@ -1,55 +1,73 @@
-import onnxruntime as ort
+import logging
 import cv2
 import numpy as np
-import logging
+import onnxruntime as ort
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class FaceVerification:
+class BiometricSystem:
     def __init__(self, model_path):
-        self.session = ort.InferenceSession(model_path)
+        self.model_path = model_path
+        self.session = ort.InferenceSession(self.model_path)
+        self.users = {}  # Dictionary to store user data
 
-    def preprocess(self, image):
-        # Resize and normalize the image
+    def register_user(self, user_id, face_image):
         try:
-            image = cv2.resize(image, (224, 224))  # Adjust size for your model
-            image = image.astype(np.float32) / 255.0  # Normalize to [0, 1]
-            image = np.transpose(image, (2, 0, 1))  # Change to CHW format
-            image = np.expand_dims(image, axis=0)  # Add batch dimension
-            return image
+            # Process the face_image to prepare it for the model
+            tensor = self.prepare_image(face_image)
+            # Store user data
+            self.users[user_id] = tensor
+            logging.info(f'User {user_id} registered successfully.')
         except Exception as e:
-            logging.error(f"Error in preprocessing image: {e}")
+            logging.error(f'Error registering user {user_id}: {str(e)}')
+
+    def verify_user(self, user_id, face_image):
+        try:
+            if user_id not in self.users:
+                logging.warning(f'User {user_id} not found.')
+                return False
+            tensor = self.prepare_image(face_image)
+            recognition_result = self.recognize_face(tensor)
+            is_verified = recognition_result == self.users[user_id]
+            logging.info(f'User {user_id} verification status: {is_verified}')
+            return is_verified
+        except Exception as e:
+            logging.error(f'Error verifying user {user_id}: {str(e)}')
+            return False
+
+    def prepare_image(self, face_image):
+        try:
+            # Resize and normalize image
+            face_image = cv2.resize(face_image, (224, 224))  # Resize to model input size
+            face_image = face_image.astype(np.float32) / 255.0  # Normalize
+            face_image = np.expand_dims(face_image, axis=0)  # Add batch dimension
+            return face_image
+        except Exception as e:
+            logging.error(f'Error preparing image: {str(e)}')
             raise
 
-    def verify(self, image1, image2):
+    def recognize_face(self, tensor):
         try:
-            img1 = self.preprocess(image1)
-            img2 = self.preprocess(image2)
-            # Perform inference
-            output1 = self.session.run(None, {"input": img1})[0]
-            output2 = self.session.run(None, {"input": img2})[0]
-            # Calculate cosine similarity
-            similarity = np.dot(output1, output2) / (np.linalg.norm(output1) * np.linalg.norm(output2))
-            return similarity
+            input_name = self.session.get_inputs()[0].name
+            output_name = self.session.get_outputs()[0].name
+            result = self.session.run([output_name], {input_name: tensor})
+            logging.info('Face recognition successful.')
+            return result[0]
         except Exception as e:
-            logging.error(f"Verification failed: {e}")
+            logging.error(f'Error recognizing face: {str(e)}')
             raise
 
-    def register(self, image):
+    def health_check(self):
         try:
-            embedding = self.preprocess(image)
-            # Save embedding logic here
-            return embedding
+            logging.info('Health check successful: System is operational.')
+            return {'status': 'OK', 'message': 'System is operational'}
         except Exception as e:
-            logging.error(f"Registration failed: {e}")
-            raise
+            logging.error(f'Error during health check: {str(e)}')
+            return {'status': 'ERROR', 'message': str(e)}
 
-# Usage example
-if __name__ == '__main__':
-    verifier = FaceVerification('path_to_your_onnx_model.onnx')
-    # Load images
-    image1 = cv2.imread('path_to_image1.jpg')
-    image2 = cv2.imread('path_to_image2.jpg')
-    similarity_score = verifier.verify(image1, image2)
-    print(f'Similarity score: {similarity_score}')
+# Example usage:  
+# model = BiometricSystem('path_to_model.onnx')  
+# model.register_user('user_1', face_image)  
+# is_verified = model.verify_user('user_1', face_image)  
+# health = model.health_check()  
