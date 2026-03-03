@@ -4,7 +4,7 @@ import * as faceapi from 'face-api.js';
 import axios from 'axios';
 import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -1245,11 +1245,11 @@ const RegisterView = ({ setCurrentView }) => {
     try {
       setMessage({ type: 'info', text: 'Registering person...' });
 
-      // 1. Register with Python Backend (ArcFace)
-      const registerData = new FormData();
-      registerData.append('file', capturedImageBlob, `${formData.name}.jpg`);
-
-      await axios.post(`${API_URL}/register?name=${encodeURIComponent(formData.idNumber + '_' + formData.name)}`, registerData);
+      await axios.post(`${API_URL}/register`, {
+        user_id: formData.idNumber,
+        name: formData.name,
+        image: capturedImage
+      });
 
       // 2. Original Supabase flow
       const { data, error } = await supabase
@@ -1559,10 +1559,11 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
       const finalId = formData.idNumber || visitorId;
 
       // 1. Register with Python Backend (ArcFace)
-      const registerData = new FormData();
-      registerData.append('file', capturedImageBlob, `${formData.name}.jpg`);
-
-      await axios.post(`${API_URL}/register?name=${encodeURIComponent(finalId + '_' + formData.name)}`, registerData);
+      await axios.post(`${API_URL}/register`, {
+        user_id: finalId,
+        name: formData.name,
+        image: capturedImage
+      });
 
       // 2. Original Supabase flow
       const { data, error } = await supabase
