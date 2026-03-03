@@ -5,3 +5,5 @@ __pycache__/
 .env
 .env.*
 *.onnx
+**/*.onnx
+backend/arcface.onnx

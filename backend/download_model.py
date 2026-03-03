@@ -12,6 +12,12 @@ MODEL_URL = os.environ.get('MODEL_URL', '')
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'arcface.onnx')
 
 def download_model():
+    # Allow manual override for re-downloads
+    if os.environ.get('FORCE_DOWNLOAD', '').lower() == 'true':
+        if os.path.exists(MODEL_PATH):
+            print(f"FORCE_DOWNLOAD is true. Deleting existing model at {MODEL_PATH}...")
+            os.remove(MODEL_PATH)
+
     # If the file exists, check if it's actually a model (not a 0-byte or small pointer file)
     if os.path.exists(MODEL_PATH):
         file_size = os.path.getsize(MODEL_PATH)
