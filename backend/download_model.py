@@ -8,7 +8,7 @@ import os
 import sys
 import requests
 
-MODEL_URL = os.environ.get('MODEL_URL', '')
+MODEL_URL = os.environ.get('MODEL_URL', '').strip().replace('\n', '').replace('\r', '')
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'arcface.onnx')
 
 def download_model():
