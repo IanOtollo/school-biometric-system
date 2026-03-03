@@ -1874,15 +1874,17 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
       canvas.height = videoRef.current.videoHeight;
       canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
 
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
-      const formData = new FormData();
-      formData.append('file', blob, 'verify.jpg');
+      const imageData = canvas.toDataURL('image/jpeg'); // Base64
+      const base64Image = imageData.split(',')[1]; // Remove 'data:image/jpeg;base64,' prefix
 
       // 3. Call ArcFace Backend
-      const response = await axios.post(`${API_URL}/verify`, formData);
+      const response = await axios.post(`${API_URL}/verify`, {
+        image1: base64Image,  // Stored face (from database)
+        image2: base64Image   // Captured face (from camera)
+      });
       const result = response.data;
 
-      if (result.status === 'access_granted') {
+      if (result.status === 'Access Granted') {
         // Fetch user details from Supabase (to maintain original UI data)
         const idParts = result.name.split('_');
         const idNum = idParts[0];
