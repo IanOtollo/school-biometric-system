@@ -1210,7 +1210,10 @@ const RegisterView = ({ setCurrentView }) => {
         }, 'image/jpeg');
 
         const previewCanvas = canvasRef.current;
-        const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
+        const displaySize = {
+          width: videoRef.current.videoWidth || 640,
+          height: videoRef.current.videoHeight || 480
+        };
         faceapi.matchDimensions(previewCanvas, displaySize);
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         previewCanvas.getContext('2d').clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -1517,7 +1520,10 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
         }, 'image/jpeg');
 
         const previewCanvas = canvasRef.current;
-        const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
+        const displaySize = {
+          width: videoRef.current.videoWidth || 640,
+          height: videoRef.current.videoHeight || 480
+        };
         faceapi.matchDimensions(previewCanvas, displaySize);
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         previewCanvas.getContext('2d').clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -1853,7 +1859,10 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
 
       // Visual feedback
       const previewCanvas = canvasRef.current;
-      const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
+      const displaySize = {
+        width: videoRef.current.videoWidth || 640,
+        height: videoRef.current.videoHeight || 480
+      };
       faceapi.matchDimensions(previewCanvas, displaySize);
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       previewCanvas.getContext('2d').clearRect(0, 0, previewCanvas.width, previewCanvas.height);
