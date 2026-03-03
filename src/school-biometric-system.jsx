@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
+import axios from 'axios';
 import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle } from 'lucide-react';
+
+const API_URL = 'http://localhost:8000';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -1156,6 +1159,7 @@ const RegisterView = ({ setCurrentView }) => {
     email: ''
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
+  const [capturedImageBlob, setCapturedImageBlob] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -1189,21 +1193,29 @@ const RegisterView = ({ setCurrentView }) => {
     setMessage({ type: 'info', text: 'Analyzing face...' });
 
     try {
-      // Use resilient scanning loop
       setMessage({ type: 'info', text: 'Analyzing face... Please stay still.' });
       const detections = await detectFaceWithRetry(videoRef.current);
 
       if (detections) {
-        setCapturedDescriptor(Array.from(detections.descriptor));
-        setMessage({ type: 'success', text: 'Face captured successfully!' });
+        // Create capsule for backend
+        const canvas = document.createElement('canvas');
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
 
-        const canvas = canvasRef.current;
+        canvas.toBlob((blob) => {
+          setCapturedImageBlob(blob);
+          setCapturedDescriptor(Array.from(detections.descriptor));
+          setMessage({ type: 'success', text: 'Face captured successfully!' });
+        }, 'image/jpeg');
+
+        const previewCanvas = canvasRef.current;
         const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
-        faceapi.matchDimensions(canvas, displaySize);
+        faceapi.matchDimensions(previewCanvas, displaySize);
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        faceapi.draw.drawDetections(canvas, resizedDetections);
-        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+        previewCanvas.getContext('2d').clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        faceapi.draw.drawDetections(previewCanvas, resizedDetections);
+        faceapi.draw.drawFaceLandmarks(previewCanvas, resizedDetections);
       } else {
         setMessage({ type: 'error', text: 'No face detected. Please position your face clearly.' });
       }
@@ -1230,6 +1242,13 @@ const RegisterView = ({ setCurrentView }) => {
     try {
       setMessage({ type: 'info', text: 'Registering person...' });
 
+      // 1. Register with Python Backend (ArcFace)
+      const registerData = new FormData();
+      registerData.append('file', capturedImageBlob, `${formData.name}.jpg`);
+
+      await axios.post(`${API_URL}/register?name=${encodeURIComponent(formData.idNumber + '_' + formData.name)}`, registerData);
+
+      // 2. Original Supabase flow
       const { data, error } = await supabase
         .from('users')
         .insert([
@@ -1262,7 +1281,7 @@ const RegisterView = ({ setCurrentView }) => {
       }, 2000);
 
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Registration failed' });
+      setMessage({ type: 'error', text: error.response?.data?.detail || error.message || 'Registration failed' });
     }
   };
 
@@ -1441,6 +1460,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
     hostName: ''
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
+  const [capturedImageBlob, setCapturedImageBlob] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -1480,21 +1500,29 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
     setMessage({ type: 'info', text: 'Analyzing face...' });
 
     try {
-      // Use resilient scanning loop
       setMessage({ type: 'info', text: 'Analyzing face... Please stay still.' });
       const detections = await detectFaceWithRetry(videoRef.current);
 
       if (detections) {
-        setCapturedDescriptor(Array.from(detections.descriptor));
-        setMessage({ type: 'success', text: 'Face captured successfully!' });
+        // Create capsule for backend
+        const canvas = document.createElement('canvas');
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
 
-        const canvas = canvasRef.current;
+        canvas.toBlob((blob) => {
+          setCapturedImageBlob(blob);
+          setCapturedDescriptor(Array.from(detections.descriptor));
+          setMessage({ type: 'success', text: 'Face captured successfully!' });
+        }, 'image/jpeg');
+
+        const previewCanvas = canvasRef.current;
         const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
-        faceapi.matchDimensions(canvas, displaySize);
+        faceapi.matchDimensions(previewCanvas, displaySize);
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        faceapi.draw.drawDetections(canvas, resizedDetections);
-        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+        previewCanvas.getContext('2d').clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        faceapi.draw.drawDetections(previewCanvas, resizedDetections);
+        faceapi.draw.drawFaceLandmarks(previewCanvas, resizedDetections);
       } else {
         setMessage({ type: 'error', text: 'No face detected. Please position your face clearly.' });
       }
@@ -1522,13 +1550,21 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
       setMessage({ type: 'info', text: 'Registering visitor...' });
 
       const visitorId = 'V-' + Date.now();
+      const finalId = formData.idNumber || visitorId;
 
+      // 1. Register with Python Backend (ArcFace)
+      const registerData = new FormData();
+      registerData.append('file', capturedImageBlob, `${formData.name}.jpg`);
+
+      await axios.post(`${API_URL}/register?name=${encodeURIComponent(finalId + '_' + formData.name)}`, registerData);
+
+      // 2. Original Supabase flow
       const { data, error } = await supabase
         .from('users')
         .insert([
           {
             name: formData.name,
-            id_number: formData.idNumber || visitorId,
+            id_number: finalId,
             role: 'visitor',
             status: 'visitor',
             email: formData.phone,
@@ -1544,7 +1580,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
       setMessage({ type: 'success', text: 'Visitor registered successfully! Temporary access granted.' });
 
       await supabase.from('access_logs').insert([{
-        user_id: formData.idNumber || visitorId,
+        user_id: finalId,
         name: formData.name,
         action: 'visitor_registered',
         timestamp: new Date().toISOString()
@@ -1555,7 +1591,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
       }, 2000);
 
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Registration failed' });
+      setMessage({ type: 'error', text: error.response?.data?.detail || error.message || 'Registration failed' });
     }
   };
 
@@ -1802,7 +1838,7 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
     setVerificationResult(null);
 
     try {
-      // Use resilient scanning loop
+      // 1. Use face-api.js for visual detection feedback
       const detections = await detectFaceWithRetry(videoRef.current, 5000);
 
       if (!detections) {
@@ -1815,89 +1851,63 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
         return;
       }
 
-      const canvas = canvasRef.current;
+      // Visual feedback
+      const previewCanvas = canvasRef.current;
       const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
-      faceapi.matchDimensions(canvas, displaySize);
+      faceapi.matchDimensions(previewCanvas, displaySize);
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
-      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-      faceapi.draw.drawDetections(canvas, resizedDetections);
+      previewCanvas.getContext('2d').clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      faceapi.draw.drawDetections(previewCanvas, resizedDetections);
 
-      const { data: users, error } = await supabase
-        .from('users')
-        .select('*');
+      // 2. Capture Frame for Backend
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
 
-      if (error) throw error;
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+      const formData = new FormData();
+      formData.append('file', blob, 'verify.jpg');
 
-      if (!users || users.length === 0) {
-        setVerificationResult({
-          success: false,
-          message: 'No registered users found',
-          type: 'error'
-        });
-        setIsVerifying(false);
-        return;
-      }
+      // 3. Call ArcFace Backend
+      const response = await axios.post(`${API_URL}/verify`, formData);
+      const result = response.data;
 
-      const threshold = 0.7;
-      let bestMatch = null;
-      let bestDistance = 1;
+      if (result.status === 'access_granted') {
+        // Fetch user details from Supabase (to maintain original UI data)
+        const idParts = result.name.split('_');
+        const idNum = idParts[0];
 
-      for (const user of users) {
-        if (user.face_descriptor) {
-          const descriptor = new Float32Array(user.face_descriptor);
-          const distance = faceapi.euclideanDistance(detections.descriptor, descriptor);
+        const { data: users, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id_number', idNum)
+          .single();
 
-          if (distance < threshold && distance < bestDistance) {
-            bestDistance = distance;
-            bestMatch = user;
-          }
-        }
-      }
+        if (users) {
+          await supabase.from('access_logs').insert([{
+            user_id: users.id_number,
+            name: users.name,
+            role: users.role,
+            action: 'access_granted',
+            timestamp: new Date().toISOString(),
+            confidence: result.confidence * 100
+          }]);
 
-      if (bestMatch) {
-        let accessGranted = true;
-
-        // Check visitor expiry
-        if (bestMatch.status === 'visitor' && bestMatch.valid_until) {
-          const validUntil = new Date(bestMatch.valid_until);
-          if (validUntil < new Date()) {
-            accessGranted = false;
-          }
-        }
-
-        // Deny access for suspended/discontinued
-        if (bestMatch.status === 'suspended' || bestMatch.status === 'discontinued') {
-          accessGranted = false;
-
-          const alertData = {
-            user_id: bestMatch.id_number,
-            name: bestMatch.name,
-            role: bestMatch.role,
-            action: 'access_denied',
-            timestamp: new Date().toISOString()
-          };
-
-          addAlert(alertData);
-        }
-
-        await supabase.from('access_logs').insert([{
-          user_id: bestMatch.id_number,
-          name: bestMatch.name,
-          role: bestMatch.role,
-          action: accessGranted ? 'access_granted' : 'access_denied',
-          timestamp: new Date().toISOString(),
-          confidence: (1 - bestDistance) * 100
-        }]);
-
-        setVerificationResult({
-          success: accessGranted,
-          user: bestMatch,
-          confidence: ((1 - bestDistance) * 100).toFixed(1),
-          type: accessGranted ? 'success' : 'error'
-        });
-
-        if (continuousMode) {
-          setTimeout(() => setVerificationResult(null), 3000);
+          setVerificationResult({
+            success: true,
+            user: users,
+            confidence: (result.confidence * 100).toFixed(1),
+            type: 'success'
+          });
+        } else {
+          // Fallback if metadata not in supabase but in face_db
+          setVerificationResult({
+            success: true,
+            user: { name: result.name.split('_')[1] || result.name, status: 'active', role: 'unknown' },
+            confidence: (result.confidence * 100).toFixed(1),
+            type: 'success'
+          });
         }
       } else {
         await supabase.from('access_logs').insert([{
@@ -1909,20 +1919,20 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
 
         setVerificationResult({
           success: false,
-          message: 'Face not recognized - Access Denied',
+          message: result.message || 'Face not recognized - Access Denied',
           type: 'error'
         });
+      }
 
-        if (continuousMode) {
-          setTimeout(() => setVerificationResult(null), 3000);
-        }
+      if (continuousMode) {
+        setTimeout(() => setVerificationResult(null), 3000);
       }
 
     } catch (error) {
       console.error('Verification error:', error);
       setVerificationResult({
         success: false,
-        message: 'Verification error',
+        message: error.response?.data?.detail || 'Verification error',
         type: 'error'
       });
     }

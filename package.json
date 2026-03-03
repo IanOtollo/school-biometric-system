@@ -2,6 +2,7 @@
   "name": "school-biometric-access-system",
   "version": "1.0.0",
   "description": "Facial recognition-based biometric access control system for schools",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "axios": "^1.13.6",
     "face-api.js": "^0.22.2",
     "lucide-react": "^0.560.0",
     "react": "^18.2.0",
