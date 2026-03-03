@@ -1159,7 +1159,7 @@ const RegisterView = ({ setCurrentView }) => {
     email: ''
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
-  const [capturedImageBlob, setCapturedImageBlob] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -1203,11 +1203,11 @@ const RegisterView = ({ setCurrentView }) => {
         canvas.height = videoRef.current.videoHeight;
         canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
 
-        canvas.toBlob((blob) => {
-          setCapturedImageBlob(blob);
-          setCapturedDescriptor(Array.from(detections.descriptor));
-          setMessage({ type: 'success', text: 'Face captured successfully!' });
-        }, 'image/jpeg');
+        const imageData = canvas.toDataURL('image/jpeg');
+        const base64Image = imageData.split(',')[1];
+        setCapturedImage(base64Image);
+        setCapturedDescriptor(Array.from(detections.descriptor));
+        setMessage({ type: 'success', text: 'Face captured successfully!' });
 
         const previewCanvas = canvasRef.current;
         const displaySize = {
@@ -1463,7 +1463,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
     hostName: ''
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
-  const [capturedImageBlob, setCapturedImageBlob] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -1513,11 +1513,11 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
         canvas.height = videoRef.current.videoHeight;
         canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
 
-        canvas.toBlob((blob) => {
-          setCapturedImageBlob(blob);
-          setCapturedDescriptor(Array.from(detections.descriptor));
-          setMessage({ type: 'success', text: 'Face captured successfully!' });
-        }, 'image/jpeg');
+        const imageData = canvas.toDataURL('image/jpeg');
+        const base64Image = imageData.split(',')[1];
+        setCapturedImage(base64Image);
+        setCapturedDescriptor(Array.from(detections.descriptor));
+        setMessage({ type: 'success', text: 'Face captured successfully!' });
 
         const previewCanvas = canvasRef.current;
         const displaySize = {
