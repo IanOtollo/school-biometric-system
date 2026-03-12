@@ -2812,25 +2812,51 @@ const EthicsTermsView = ({ setCurrentView }) => {
     <div className="content-card" style={{ maxWidth: '800px', margin: '2rem auto' }}>
       <div className="page-header">
         <h1 className="page-title">Ethics & Terms of Service</h1>
-        <p className="page-subtitle">Our commitment to privacy, safety, and transparency</p>
+        <p className="page-subtitle">Ensuring campus security with integrity and respect</p>
       </div>
       
       <div style={{ lineHeight: '1.8', color: 'var(--text-primary)' }}>
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>The Ethical Formula</h3>
-        <p style={{ fontWeight: '600', fontSize: '1.125rem', background: 'var(--background)', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-          Safety + Privacy + Consent = Ethical Biometric Integrity
-        </p>
+        <div style={{ background: 'var(--background)', padding: '1.5rem', borderRadius: '0.75rem', marginBottom: '2rem', borderLeft: '4px solid var(--primary)' }}>
+          <h3 style={{ marginTop: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>The Ethical Formula</h3>
+          <p style={{ fontWeight: '700', fontSize: '1.25rem', margin: 0 }}>
+            Safety + Privacy + Consent = Ethical Biometric Integrity
+          </p>
+        </div>
 
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>1. Data Privacy</h3>
-        <p>This system uses facial descriptors to verify identity. We do not store "pictures" in a way that can be easily stolen; instead, we store mathematical representations of facial features. Profile images are stored only for security referencing by authorized personnel.</p>
+        <section style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.75rem' }}>1. Purpose of the System</h3>
+          <p>The primary purpose of the School Biometric System is to regulate and monitor access to school premises. This ensures that only authorized individuals and registered visitors enter the campus, creating a safer environment for students and staff.</p>
+        </section>
 
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>2. Consent</h3>
-        <p>Enrollment in the system is voluntary and implies consent to have your biometric data processed for campus security purposes.</p>
+        <section style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.75rem' }}>2. Data Collection and Consent</h3>
+          <ul style={{ paddingLeft: '1.25rem' }}>
+            <li><strong>Voluntary Enrollment:</strong> Enrollment in the biometric system is based on informed consent.</li>
+            <li><strong>Minimal Data Collection:</strong> Only necessary facial descriptors and basic identification details are stored.</li>
+            <li><strong>Purpose Limitation:</strong> Data collected will NOT be used for any purpose other than access control and security monitoring.</li>
+          </ul>
+        </section>
 
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>3. Data Protection</h3>
-        <p>Access to calculations and person details is strictly restricted to authorized security staff and system administrators.</p>
+        <section style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.75rem' }}>3. Privacy and Data Security</h3>
+          <ul style={{ paddingLeft: '1.25rem' }}>
+            <li><strong>Encryption:</strong> Biometric descriptors are stored using secure mathematical representations.</li>
+            <li><strong>Restricted Access:</strong> Only authorized administrative personnel (Security/Admin) can view sensitive data.</li>
+            <li><strong>Data Preservation:</strong> Person details are maintained for historical search and security referencing even if their status changes, unless a formal deletion request is processed.</li>
+          </ul>
+        </section>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <section style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.75rem' }}>4. Individual Rights</h3>
+          <p>Individuals have the right to know what data is being held about them and can request corrections to their data through the Admin department at any time.</p>
+        </section>
+
+        <section style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.75rem' }}>5. System Integrity</h3>
+          <p>The system must not be used for discriminatory practices. Automated decisions (Access Granted/Denied) can always be manually reviewed or overridden by security personnel in special circumstances.</p>
+        </section>
+
+        <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
           <button className="btn btn-primary" onClick={() => setCurrentView('home')}>
             I Understand, Back Home
           </button>
@@ -2843,45 +2869,61 @@ const EthicsTermsView = ({ setCurrentView }) => {
 // Best Practices / Environmental Factors View Component
 const BestPracticesView = ({ setCurrentView }) => {
   return (
-    <div className="content-card" style={{ maxWidth: '800px', margin: '2rem auto' }}>
+    <div className="content-card" style={{ maxWidth: '900px', margin: '2rem auto' }}>
       <div className="page-header">
         <h1 className="page-title">System Best Practices</h1>
-        <p className="page-subtitle">Optimizing recognition for speed and accuracy</p>
+        <p className="page-subtitle">Environmental factors and optimization for reliable recognition</p>
       </div>
 
       <div style={{ lineHeight: '1.8', color: 'var(--text-primary)' }}>
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>The Accuracy Formula</h3>
-        <p style={{ fontWeight: '600', fontSize: '1.125rem', background: 'var(--background)', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-          Lighting + Positioning + Resolution = Optimal Recognition Accuracy
-        </p>
+        <div style={{ background: 'var(--background)', padding: '1.5rem', borderRadius: '0.75rem', marginBottom: '2rem', borderLeft: '4px solid var(--primary)' }}>
+          <h3 style={{ marginTop: 0, color: 'var(--primary)', fontSize: '1.25rem' }}>The Accuracy Formula</h3>
+          <p style={{ fontWeight: '700', fontSize: '1.25rem', margin: 0 }}>
+            Lighting + Positioning + Resolution = Optimal Recognition Accuracy
+          </p>
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
-          <div>
-            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <Activity size={18} color="var(--warning)" />
-              Lighting
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+          <div className="content-card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)' }}>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: 0, color: 'var(--primary)' }}>
+              <Activity size={20} color="var(--warning)" />
+              1. Lighting Conditions
             </h4>
-            <p style={{ fontSize: '0.875rem' }}>Ensure the scanning area is well-lit. Avoid strong shadows or bright light directly behind the person, as this obscures facial features.</p>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Issue:</strong> Harsh shadows or strong backlighting can obscure facial features.</p>
+            <p style={{ fontSize: '0.9rem' }}><strong>Mitigation:</strong> Ensure even, diffused light. Avoid cameras facing directly towards windows or bright external sources.</p>
           </div>
-          <div>
-            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <ScanFace size={18} color="var(--primary)" />
-              Positioning
+
+          <div className="content-card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)' }}>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: 0, color: 'var(--primary)' }}>
+              <ScanFace size={20} color="var(--primary)" />
+              2. Subject Positioning
             </h4>
-            <p style={{ fontSize: '0.875rem' }}>The person should look directly into the camera lens. Their face should fit within the on-screen oval guide for best results.</p>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Issue:</strong> Extreme face angles (looking up/down/side) deviate from registration templates.</p>
+            <p style={{ fontSize: '0.9rem' }}><strong>Mitigation:</strong> Subjects should look directly into the eye-level camera lens and align with the on-screen oval guide.</p>
           </div>
-          <div>
-            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <UserCircle size={18} color="var(--success)" />
-              Profile Photos
+
+          <div className="content-card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)' }}>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: 0, color: 'var(--primary)' }}>
+              <Clock size={20} color="var(--success)" />
+              3. Distance & Resolution
             </h4>
-            <p style={{ fontSize: '0.875rem' }}>Admins can now see profile photos in the management console for secondary verification if the system identifies a person.</p>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Issue:</strong> Standing too far or too close causes feature distortion or pixelation.</p>
+            <p style={{ fontSize: '0.9rem' }}><strong>Mitigation:</strong> Maintain a distance of 0.5m to 1.5m. Use high-quality webcams (minimum 720p resolution).</p>
+          </div>
+
+          <div className="content-card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)' }}>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: 0, color: 'var(--primary)' }}>
+              <Shield size={20} color="var(--danger)" />
+              4. Obstructions
+            </h4>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Issue:</strong> Masks, sunglasses, or heavy scarves covering parts of the face.</p>
+            <p style={{ fontSize: '0.9rem' }}><strong>Mitigation:</strong> Users should briefly remove obstructions during the scan for the highest accuracy.</p>
           </div>
         </div>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <div style={{ marginTop: '2.5rem', textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
           <button className="btn btn-primary" onClick={() => setCurrentView('home')}>
-            Back Home
+            Return to Home
           </button>
         </div>
       </div>
