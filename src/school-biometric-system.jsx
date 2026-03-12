@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
 import axios from 'axios';
-import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle, UserCircle } from 'lucide-react';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle, UserCircle, Search, Filter } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -2695,6 +2695,8 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminA
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
@@ -2750,7 +2752,7 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminA
           <h1 className="page-title">Admin Management console</h1>
           <p className="page-subtitle">View and manage person statuses with profile images</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '1rem' }}>
           <button className="btn" onClick={fetchPeople} disabled={loading}>
             Refresh Data
           </button>
@@ -2763,9 +2765,44 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminA
         </div>
       </div>
 
+      <div className="content-card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+            <input
+              type="text"
+              placeholder="Search by name or ID number..."
+              className="form-input"
+              style={{ paddingLeft: '2.5rem' }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '500' }}>
+              <Filter size={18} />
+              Filter Status:
+            </div>
+            <select
+              className="form-select"
+              style={{ width: '160px' }}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="graduate">Graduate</option>
+              <option value="suspended">Suspended</option>
+              <option value="discontinued">Discontinued</option>
+              <option value="visitor">Visitor</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {message.text && (
         <div className={`alert alert-${message.type}`}>
-          {message.type === 'success' ? <CheckCircle size={16} /> : <XCircle size={16} />}
+          {message.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
           {message.text}
         </div>
       )}
@@ -2794,8 +2831,16 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminA
               </tr>
             </thead>
             <tbody>
-              {people.map((person) => (
-                <tr key={person.id_number}>
+              {people
+                .filter(person => {
+                  const matchesSearch =
+                    person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    person.id_number.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesFilter = filterStatus === 'all' || person.status === filterStatus;
+                  return matchesSearch && matchesFilter;
+                })
+                .map((person) => (
+                  <tr key={person.id_number}>
                   <td>
                     {person.profile_image ? (
                       <img
