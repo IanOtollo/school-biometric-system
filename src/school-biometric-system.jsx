@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
 import axios from 'axios';
-import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle } from 'lucide-react';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle, UserCircle } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
