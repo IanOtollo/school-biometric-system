@@ -8,7 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
     id_number VARCHAR(100) UNIQUE NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN ('student', 'lecturer', 'staff')),
     email VARCHAR(255),
-    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'graduate', 'suspended', 'discontinued')),
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'graduate', 'suspended', 'discontinued', 'visitor')),
+    profile_image TEXT, -- Stores base64 image data
+    visitor_tag VARCHAR(100), -- Unique tag for visitors
     face_descriptor FLOAT8[] NOT NULL, -- Stores 128-dimensional face descriptor
     registered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

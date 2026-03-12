@@ -1075,12 +1075,24 @@ const BiometricAccessSystem = () => {
             <AdminLoginView setCurrentView={setCurrentView} setIsAdminAuthenticated={setIsAdminAuthenticated} />
           ) : currentView === 'admin-management' ? (
             <AdminManagementView setCurrentView={setCurrentView} isAdminAuthenticated={isAdminAuthenticated} />
+          ) : currentView === 'ethics' ? (
+            <EthicsTermsView setCurrentView={setCurrentView} />
+          ) : currentView === 'best-practices' ? (
+            <BestPracticesView setCurrentView={setCurrentView} />
           ) : null}
         </main>
 
         <footer className="footer">
           <div className="footer-content">
-            © {new Date().getFullYear()}. All rights reserved.
+            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+              <button className="btn" style={{ border: 'none', background: 'none', color: 'var(--primary)', fontWeight: '600' }} onClick={() => setCurrentView('ethics')}>
+                Ethics & Terms
+              </button>
+              <button className="btn" style={{ border: 'none', background: 'none', color: 'var(--primary)', fontWeight: '600' }} onClick={() => setCurrentView('best-practices')}>
+                Best Practices
+              </button>
+            </div>
+            © {new Date().getFullYear()}. School Biometric Access System. All rights reserved.
           </div>
         </footer>
 
@@ -1171,7 +1183,8 @@ const RegisterView = ({ setCurrentView }) => {
     idNumber: '',
     role: 'student',
     status: 'active',
-    email: ''
+    email: '',
+    profile_image: null
   });
   const [capturedDescriptor, setCapturedDescriptor] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
@@ -1276,6 +1289,7 @@ const RegisterView = ({ setCurrentView }) => {
             role: formData.role,
             status: formData.status,
             email: formData.email,
+            profile_image: capturedImage,
             visit_purpose: null,
             valid_until: null,
             face_descriptor: capturedDescriptor,
@@ -1590,6 +1604,8 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
             role: 'visitor',
             status: 'visitor',
             email: formData.phone,
+            profile_image: capturedImage,
+            visitor_tag: `TAG-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${formData.visitPurpose.slice(0, 3).toUpperCase()}`,
             visit_purpose: formData.visitPurpose + (formData.hostName ? ` | Host: ${formData.hostName}` : ''),
             valid_until: formData.validUntil || null,
             face_descriptor: capturedDescriptor,
@@ -2016,7 +2032,16 @@ const VerifyView = ({ setCurrentView, addAlert }) => {
             <div className="verification-overlay">
               {verificationResult.success ? (
                 <>
-                  <CheckCircle className="result-icon" color={getStatusColor(verificationResult.user.status)} />
+                  {verificationResult.user.profile_image ? (
+                    <img
+                      src={`data:image/jpeg;base64,${verificationResult.user.profile_image}`}
+                      alt={verificationResult.user.name}
+                      className="result-icon"
+                      style={{ borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 0 20px rgba(0,0,0,0.3)' }}
+                    />
+                  ) : (
+                    <CheckCircle className="result-icon" color={getStatusColor(verificationResult.user.status)} />
+                  )}
                   <div className="result-name">
                     {verificationResult.user.name}
                   </div>
@@ -2507,6 +2532,7 @@ const AdminLoginView = ({ setCurrentView, setIsAdminAuthenticated }) => {
     username: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const handleLogin = (e) => {
@@ -2554,13 +2580,32 @@ const AdminLoginView = ({ setCurrentView, setIsAdminAuthenticated }) => {
               <Shield size={16} />
               Password
             </label>
-            <input
-              type="password"
-              className="form-input"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-input"
+                style={{ paddingRight: '2.5rem' }}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                <Eye size={18} />
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
@@ -2631,11 +2676,19 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated }) => {
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 className="page-title">Admin Management console</h1>
-          <p className="page-subtitle">View and manage person statuses without deleting records</p>
+          <p className="page-subtitle">View and manage person statuses with profile images</p>
         </div>
-        <button className="btn" onClick={fetchPeople} disabled={loading}>
-          Refresh Data
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn" onClick={fetchPeople} disabled={loading}>
+            Refresh Data
+          </button>
+          <button className="btn btn-danger" onClick={() => {
+            setIsAdminAuthenticated(false);
+            setCurrentView('home');
+          }}>
+            Logout
+          </button>
+        </div>
       </div>
 
       {message.text && (
@@ -2660,8 +2713,9 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated }) => {
           <table className="table">
             <thead>
               <tr>
+                <th>Profile</th>
                 <th>Name</th>
-                <th>ID Number</th>
+                <th>ID/Tag</th>
                 <th>Role</th>
                 <th>Current Status</th>
                 <th>Actions</th>
@@ -2670,8 +2724,28 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated }) => {
             <tbody>
               {people.map((person) => (
                 <tr key={person.id_number}>
+                  <td>
+                    {person.profile_image ? (
+                      <img
+                        src={`data:image/jpeg;base64,${person.profile_image}`}
+                        alt={person.name}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }}
+                      />
+                    ) : (
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <User size={20} color="var(--text-secondary)" />
+                      </div>
+                    )}
+                  </td>
                   <td style={{ fontWeight: '500' }}>{person.name}</td>
-                  <td>{person.id_number}</td>
+                  <td>
+                    <div style={{ fontSize: '0.875rem' }}>{person.id_number}</div>
+                    {person.visitor_tag && (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600' }}>
+                        {person.visitor_tag}
+                      </div>
+                    )}
+                  </td>
                   <td>
                     <span className={`badge badge-${person.role}`}>
                       {person.role}
@@ -2701,6 +2775,90 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated }) => {
             </tbody>
           </table>
         )}
+      </div>
+    </div>
+  );
+};
+
+
+// Ethics and Terms View Component
+const EthicsTermsView = ({ setCurrentView }) => {
+  return (
+    <div className="content-card" style={{ maxWidth: '800px', margin: '2rem auto' }}>
+      <div className="page-header">
+        <h1 className="page-title">Ethics & Terms of Service</h1>
+        <p className="page-subtitle">Our commitment to privacy, safety, and transparency</p>
+      </div>
+      
+      <div style={{ lineHeight: '1.8', color: 'var(--text-primary)' }}>
+        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>The Ethical Formula</h3>
+        <p style={{ fontWeight: '600', fontSize: '1.125rem', background: 'var(--background)', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+          Safety + Privacy + Consent = Ethical Biometric Integrity
+        </p>
+
+        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>1. Data Privacy</h3>
+        <p>This system uses facial descriptors to verify identity. We do not store "pictures" in a way that can be easily stolen; instead, we store mathematical representations of facial features. Profile images are stored only for security referencing by authorized personnel.</p>
+
+        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>2. Consent</h3>
+        <p>Enrollment in the system is voluntary and implies consent to have your biometric data processed for campus security purposes.</p>
+
+        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>3. Data Protection</h3>
+        <p>Access to calculations and person details is strictly restricted to authorized security staff and system administrators.</p>
+
+        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <button className="btn btn-primary" onClick={() => setCurrentView('home')}>
+            I Understand, Back Home
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Best Practices / Environmental Factors View Component
+const BestPracticesView = ({ setCurrentView }) => {
+  return (
+    <div className="content-card" style={{ maxWidth: '800px', margin: '2rem auto' }}>
+      <div className="page-header">
+        <h1 className="page-title">System Best Practices</h1>
+        <p className="page-subtitle">Optimizing recognition for speed and accuracy</p>
+      </div>
+
+      <div style={{ lineHeight: '1.8', color: 'var(--text-primary)' }}>
+        <h3 style={{ marginTop: '1.5rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>The Accuracy Formula</h3>
+        <p style={{ fontWeight: '600', fontSize: '1.125rem', background: 'var(--background)', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+          Lighting + Positioning + Resolution = Optimal Recognition Accuracy
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
+          <div>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <Activity size={18} color="var(--warning)" />
+              Lighting
+            </h4>
+            <p style={{ fontSize: '0.875rem' }}>Ensure the scanning area is well-lit. Avoid strong shadows or bright light directly behind the person, as this obscures facial features.</p>
+          </div>
+          <div>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <ScanFace size={18} color="var(--primary)" />
+              Positioning
+            </h4>
+            <p style={{ fontSize: '0.875rem' }}>The person should look directly into the camera lens. Their face should fit within the on-screen oval guide for best results.</p>
+          </div>
+          <div>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <UserCircle size={18} color="var(--success)" />
+              Profile Photos
+            </h4>
+            <p style={{ fontSize: '0.875rem' }}>Admins can now see profile photos in the management console for secondary verification if the system identifies a person.</p>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <button className="btn btn-primary" onClick={() => setCurrentView('home')}>
+            Back Home
+          </button>
+        </div>
       </div>
     </div>
   );
