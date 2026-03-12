@@ -1594,6 +1594,8 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
         image: capturedImage
       });
 
+      const visitorTag = `TAG-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${formData.visitPurpose.slice(0, 3).toUpperCase()}`;
+
       // 2. Original Supabase flow
       const { data, error } = await supabase
         .from('users')
@@ -1605,7 +1607,7 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
             status: 'visitor',
             email: formData.phone,
             profile_image: capturedImage,
-            visitor_tag: `TAG-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${formData.visitPurpose.slice(0, 3).toUpperCase()}`,
+            visitor_tag: visitorTag,
             visit_purpose: formData.visitPurpose + (formData.hostName ? ` | Host: ${formData.hostName}` : ''),
             valid_until: formData.validUntil || null,
             face_descriptor: capturedDescriptor,
@@ -1615,7 +1617,16 @@ const VisitorRegistrationView = ({ setCurrentView }) => {
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Visitor registered successfully! Temporary access granted.' });
+      setMessage({ 
+        type: 'success', 
+        text: (
+          <span>
+            Visitor registered successfully! <br/>
+            <strong>Your Visitor Tag: {visitorTag}</strong> <br/>
+            Please submit this tag when leaving the institution.
+          </span>
+        )
+      });
 
       await supabase.from('access_logs').insert([{
         user_id: finalId,
@@ -2429,6 +2440,7 @@ const DashboardView = ({ setCurrentView }) => {
                 <table className="table">
                   <thead>
                     <tr>
+                      <th>Profile</th>
                       <th>Name</th>
                       <th>ID Number</th>
                       <th>Category</th>
@@ -2441,6 +2453,19 @@ const DashboardView = ({ setCurrentView }) => {
                   <tbody>
                     {users.map((user) => (
                       <tr key={user.id_number}>
+                        <td>
+                          {user.profile_image ? (
+                            <img
+                              src={`data:image/jpeg;base64,${user.profile_image}`}
+                              alt={user.name}
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <User size={16} color="var(--text-secondary)" />
+                            </div>
+                          )}
+                        </td>
                         <td>{user.name}</td>
                         <td>{user.id_number}</td>
                         <td>
