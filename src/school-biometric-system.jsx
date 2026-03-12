@@ -64,6 +64,7 @@ const BiometricAccessSystem = () => {
   const [loading, setLoading] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const [showAlertPanel, setShowAlertPanel] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   useEffect(() => {
     loadModels();
@@ -974,6 +975,16 @@ const BiometricAccessSystem = () => {
               <span>Campus Gate Access System</span>
             </div>
             <nav className="nav-buttons">
+              <button className="btn" onClick={() => {
+                if (isAdminAuthenticated) {
+                  setCurrentView('admin-management');
+                } else {
+                  setCurrentView('admin-login');
+                }
+              }}>
+                <Shield size={16} />
+                Admin
+              </button>
               <button className="btn" onClick={() => setCurrentView('home')}>
                 <Home size={16} />
                 Home
@@ -1060,6 +1071,10 @@ const BiometricAccessSystem = () => {
             <SecurityMonitorView setCurrentView={setCurrentView} alerts={alerts} />
           ) : currentView === 'dashboard' ? (
             <DashboardView setCurrentView={setCurrentView} />
+          ) : currentView === 'admin-login' ? (
+            <AdminLoginView setCurrentView={setCurrentView} setIsAdminAuthenticated={setIsAdminAuthenticated} />
+          ) : currentView === 'admin-management' ? (
+            <AdminManagementView setCurrentView={setCurrentView} isAdminAuthenticated={isAdminAuthenticated} />
           ) : null}
         </main>
 
@@ -2481,6 +2496,212 @@ const DashboardView = ({ setCurrentView }) => {
           )}
         </>
       )}
+    </div>
+  );
+};
+
+
+// Admin Login View Component
+const AdminLoginView = ({ setCurrentView, setIsAdminAuthenticated }) => {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (formData.username === 'admin' && formData.password === '1234') {
+      setIsAdminAuthenticated(true);
+      setCurrentView('admin-management');
+    } else {
+      setMessage({ type: 'error', text: 'Invalid credentials. Please try again.' });
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '400px', margin: '4rem auto' }}>
+      <div className="page-header" style={{ textAlign: 'center' }}>
+        <h1 className="page-title">Admin Login</h1>
+        <p className="page-subtitle">Enter credentials to access management console</p>
+      </div>
+
+      <div className="content-card">
+        {message.text && (
+          <div className={`alert alert-${message.type}`}>
+            <XCircle size={16} />
+            {message.text}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label className="form-label">
+              <User size={16} />
+              Username
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              <Shield size={16} />
+              Password
+            </label>
+            <input
+              type="password"
+              className="form-input"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+            Login to Admin Console
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Admin Management View Component
+const AdminManagementView = ({ setCurrentView, isAdminAuthenticated }) => {
+  const [people, setPeople] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    if (!isAdminAuthenticated) {
+      setCurrentView('admin-login');
+      return;
+    }
+    fetchPeople();
+  }, [isAdminAuthenticated]);
+
+  const fetchPeople = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchWithRetry(() =>
+        supabase
+          .from('users')
+          .select('*')
+          .order('name', { ascending: true })
+      );
+      setPeople(data || []);
+    } catch (error) {
+      console.error('Error fetching people:', error);
+      setMessage({ type: 'error', text: 'Failed to load user data' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateStatus = async (idNumber, newStatus) => {
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ status: newStatus })
+        .eq('id_number', idNumber);
+
+      if (error) throw error;
+
+      setPeople(prev => prev.map(p => p.id_number === idNumber ? { ...p, status: newStatus } : p));
+      setMessage({ type: 'success', text: `Status updated successfully!` });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      setMessage({ type: 'error', text: 'Failed to update status' });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 className="page-title">Admin Management console</h1>
+          <p className="page-subtitle">View and manage person statuses without deleting records</p>
+        </div>
+        <button className="btn" onClick={fetchPeople} disabled={loading}>
+          Refresh Data
+        </button>
+      </div>
+
+      {message.text && (
+        <div className={`alert alert-${message.type}`}>
+          {message.type === 'success' ? <CheckCircle size={16} /> : <XCircle size={16} />}
+          {message.text}
+        </div>
+      )}
+
+      <div className="data-table">
+        {loading ? (
+          <div className="empty-state">
+            <div className="spinner" style={{ margin: '0 auto' }}></div>
+            <p>Loading records...</p>
+          </div>
+        ) : people.length === 0 ? (
+          <div className="empty-state">
+            <Users className="empty-icon" />
+            <p>No records found</p>
+          </div>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>ID Number</th>
+                <th>Role</th>
+                <th>Current Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {people.map((person) => (
+                <tr key={person.id_number}>
+                  <td style={{ fontWeight: '500' }}>{person.name}</td>
+                  <td>{person.id_number}</td>
+                  <td>
+                    <span className={`badge badge-${person.role}`}>
+                      {person.role}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge badge-${person.status}`}>
+                      {person.status}
+                    </span>
+                  </td>
+                  <td>
+                    <select
+                      className="form-select"
+                      style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                      value={person.status}
+                      onChange={(e) => updateStatus(person.id_number, e.target.value)}
+                      disabled={updating}
+                    >
+                      <option value="active">Active</option>
+                      <option value="graduate">Graduate</option>
+                      <option value="suspended">Suspended</option>
+                      <option value="discontinued">Discontinued</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };

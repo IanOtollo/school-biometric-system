@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     id_number VARCHAR(100) UNIQUE NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN ('student', 'lecturer', 'staff')),
     email VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'graduate', 'suspended', 'discontinued')),
     face_descriptor FLOAT8[] NOT NULL, -- Stores 128-dimensional face descriptor
     registered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -98,12 +99,13 @@ SELECT
     u.id_number,
     u.name,
     u.role,
+    u.status,
     COUNT(al.id) as total_accesses,
     MAX(al.timestamp) as last_access,
     AVG(al.confidence) FILTER (WHERE al.confidence IS NOT NULL) as avg_confidence
 FROM users u
 LEFT JOIN access_logs al ON u.id_number = al.user_id
-GROUP BY u.id_number, u.name, u.role
+GROUP BY u.id_number, u.name, u.role, u.status
 ORDER BY total_accesses DESC;
 
 -- Insert sample data (optional - remove if not needed)
