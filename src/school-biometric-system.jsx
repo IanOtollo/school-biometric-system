@@ -1085,15 +1085,6 @@ const BiometricAccessSystem = () => {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div className="alert-bell" onClick={() => setShowAlertPanel(!showAlertPanel)}>
-                <Bell size={20} color={alerts.length > 0 ? '#ef4444' : '#64748b'} />
-                {alerts.length > 0 && <span className="alert-badge">{alerts.length}</span>}
-              </div>
-
-              <button className="menu-toggle" onClick={() => setIsMobileMenuOpen(true)}>
-                <Menu size={24} />
-              </button>
-
               <nav className="nav-buttons">
                 <button className="btn" title="Admin Console" onClick={() => {
                   if (isAdminAuthenticated) {
@@ -1118,6 +1109,15 @@ const BiometricAccessSystem = () => {
                   <span>Dashboard</span>
                 </button>
               </nav>
+
+              <button className="menu-toggle" onClick={() => setIsMobileMenuOpen(true)}>
+                <Menu size={24} />
+              </button>
+
+              <div className="alert-bell" onClick={() => setShowAlertPanel(!showAlertPanel)}>
+                <Bell size={20} color={alerts.length > 0 ? '#ef4444' : '#64748b'} />
+                {alerts.length > 0 && <span className="alert-badge">{alerts.length}</span>}
+              </div>
             </div>
           </div>
         </header>
