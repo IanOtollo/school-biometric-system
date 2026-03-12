@@ -175,6 +175,7 @@ const BiometricAccessSystem = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 1rem;
         }
 
         .logo {
@@ -926,9 +927,27 @@ const BiometricAccessSystem = () => {
           font-size: 0.75rem;
         }
 
+        @media (max-width: 1024px) {
+          .monitor-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
         @media (max-width: 768px) {
           .header {
             padding: 1rem;
+          }
+
+          .header-content {
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          .nav-buttons {
+            width: 100%;
+            justify-content: center;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
           }
 
           .main-content {
@@ -947,22 +966,50 @@ const BiometricAccessSystem = () => {
             flex-direction: column;
           }
 
-          .nav-buttons {
-            flex-wrap: wrap;
-          }
-
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
-          }
-
-          .monitor-grid {
-            grid-template-columns: 1fr;
           }
 
           .alert-dropdown {
             right: 1rem;
             left: 1rem;
             width: auto;
+          }
+          
+          .page-title {
+            font-size: 1.5rem;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .nav-buttons .btn span {
+            display: none;
+          }
+          
+          .nav-buttons .btn {
+            padding: 0.625rem;
+          }
+          
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .data-table {
+            border: none;
+            background: transparent;
+          }
+          
+          .table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+          }
+
+          .stat-value {
+            font-size: 2rem;
           }
         }
       `}</style>
@@ -975,7 +1022,7 @@ const BiometricAccessSystem = () => {
               <span>Campus Gate Access System</span>
             </div>
             <nav className="nav-buttons">
-              <button className="btn" onClick={() => {
+              <button className="btn" title="Admin Console" onClick={() => {
                 if (isAdminAuthenticated) {
                   setCurrentView('admin-management');
                 } else {
@@ -983,19 +1030,19 @@ const BiometricAccessSystem = () => {
                 }
               }}>
                 <Shield size={16} />
-                Admin
+                <span>Admin</span>
               </button>
-              <button className="btn" onClick={() => setCurrentView('home')}>
+              <button className="btn" title="Return Home" onClick={() => setCurrentView('home')}>
                 <Home size={16} />
-                Home
+                <span>Home</span>
               </button>
-              <button className="btn" onClick={() => setCurrentView('security')}>
+              <button className="btn" title="Security Monitor" onClick={() => setCurrentView('security')}>
                 <Eye size={16} />
-                Security Monitor
+                <span>Security</span>
               </button>
-              <button className="btn" onClick={() => setCurrentView('dashboard')}>
+              <button className="btn" title="Dashboard" onClick={() => setCurrentView('dashboard')}>
                 <LayoutDashboard size={16} />
-                Dashboard
+                <span>Dashboard</span>
               </button>
               <div className="alert-bell" onClick={() => setShowAlertPanel(!showAlertPanel)}>
                 <Bell size={20} color={alerts.length > 0 ? '#ef4444' : '#64748b'} />
