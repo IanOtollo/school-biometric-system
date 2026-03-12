@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from 'face-api.js';
 import axios from 'axios';
-import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle, UserCircle, Search, Filter } from 'lucide-react';
+import { Shield, UserPlus, ScanFace, LayoutDashboard, Home, Users, CheckCircle, XCircle, AlertCircle, Trash2, Camera, User, Mail, Hash, Briefcase, Clock, FileText, Bell, Activity, Eye, UserCheck, AlertTriangle, UserCircle, Search, Filter, Menu, X } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -65,6 +65,7 @@ const BiometricAccessSystem = () => {
   const [alerts, setAlerts] = useState([]);
   const [showAlertPanel, setShowAlertPanel] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     loadModels();
@@ -927,6 +928,66 @@ const BiometricAccessSystem = () => {
           font-size: 0.75rem;
         }
 
+        .menu-toggle {
+          display: none;
+          background: none;
+          border: none;
+          padding: 0.5rem;
+          cursor: pointer;
+          color: var(--text-primary);
+          transition: all 0.2s;
+        }
+
+        .mobile-nav-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.98);
+          z-index: 1000;
+          display: flex;
+          flex-direction: column;
+          padding: 2rem;
+          transform: translateY(-100%);
+          transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-nav-overlay.open {
+          transform: translateY(0);
+        }
+
+        .mobile-nav-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+        }
+
+        .mobile-nav-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .mobile-nav-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 0.75rem;
+          font-weight: 500;
+          color: var(--text-primary);
+          transition: all 0.2s;
+        }
+
+        .mobile-nav-item:hover {
+          background: var(--background);
+          border-color: var(--primary);
+        }
+
         @media (max-width: 1024px) {
           .monitor-grid {
             grid-template-columns: 1fr;
@@ -939,15 +1000,16 @@ const BiometricAccessSystem = () => {
           }
 
           .header-content {
-            flex-direction: column;
             gap: 1rem;
           }
 
           .nav-buttons {
-            width: 100%;
-            justify-content: center;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
+            display: none; /* Hide standard nav on mobile */
+          }
+
+          .menu-toggle {
+            display: flex;
+            align-items: center;
           }
 
           .main-content {
@@ -1021,38 +1083,87 @@ const BiometricAccessSystem = () => {
               <Shield size={24} />
               <span>Campus Gate Access System</span>
             </div>
-            <nav className="nav-buttons">
-              <button className="btn" title="Admin Console" onClick={() => {
-                if (isAdminAuthenticated) {
-                  setCurrentView('admin-management');
-                } else {
-                  setCurrentView('admin-login');
-                }
-              }}>
-                <Shield size={16} />
-                <span>Admin</span>
-              </button>
-              <button className="btn" title="Return Home" onClick={() => setCurrentView('home')}>
-                <Home size={16} />
-                <span>Home</span>
-              </button>
-              <button className="btn" title="Security Monitor" onClick={() => setCurrentView('security')}>
-                <Eye size={16} />
-                <span>Security</span>
-              </button>
-              <button className="btn" title="Dashboard" onClick={() => setCurrentView('dashboard')}>
-                <LayoutDashboard size={16} />
-                <span>Dashboard</span>
-              </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div className="alert-bell" onClick={() => setShowAlertPanel(!showAlertPanel)}>
                 <Bell size={20} color={alerts.length > 0 ? '#ef4444' : '#64748b'} />
-                {alerts.length > 0 && (
-                  <span className="alert-badge">{alerts.length}</span>
-                )}
+                {alerts.length > 0 && <span className="alert-badge">{alerts.length}</span>}
               </div>
-            </nav>
+
+              <button className="menu-toggle" onClick={() => setIsMobileMenuOpen(true)}>
+                <Menu size={24} />
+              </button>
+
+              <nav className="nav-buttons">
+                <button className="btn" title="Admin Console" onClick={() => {
+                  if (isAdminAuthenticated) {
+                    setCurrentView('admin-management');
+                  } else {
+                    setCurrentView('admin-login');
+                  }
+                }}>
+                  <Shield size={16} />
+                  <span>Admin</span>
+                </button>
+                <button className="btn" title="Return Home" onClick={() => setCurrentView('home')}>
+                  <Home size={16} />
+                  <span>Home</span>
+                </button>
+                <button className="btn" title="Security Monitor" onClick={() => setCurrentView('security')}>
+                  <Eye size={16} />
+                  <span>Security</span>
+                </button>
+                <button className="btn" title="Dashboard" onClick={() => setCurrentView('dashboard')}>
+                  <LayoutDashboard size={16} />
+                  <span>Dashboard</span>
+                </button>
+              </nav>
+            </div>
           </div>
         </header>
+
+        {/* Mobile Navigation Overlay */}
+        <div className={`mobile-nav-overlay ${isMobileMenuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-header">
+            <div className="logo">
+              <Shield size={24} />
+              <span>Menu</span>
+            </div>
+            <button className="btn" onClick={() => setIsMobileMenuOpen(false)}>
+              <X size={24} />
+            </button>
+          </div>
+          <div className="mobile-nav-list">
+            <button className="mobile-nav-item" onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}>
+              <Home size={20} />
+              <span>Home</span>
+            </button>
+            <button className="mobile-nav-item" onClick={() => { 
+              if (isAdminAuthenticated) setCurrentView('admin-management');
+              else setCurrentView('admin-login');
+              setIsMobileMenuOpen(false); 
+            }}>
+              <Shield size={20} />
+              <span>Admin Console</span>
+            </button>
+            <button className="mobile-nav-item" onClick={() => { setCurrentView('security'); setIsMobileMenuOpen(false); }}>
+              <Eye size={20} />
+              <span>Security Monitor</span>
+            </button>
+            <button className="mobile-nav-item" onClick={() => { setCurrentView('dashboard'); setIsMobileMenuOpen(false); }}>
+              <LayoutDashboard size={20} />
+              <span>System Dashboard</span>
+            </button>
+            <button className="mobile-nav-item" onClick={() => { setCurrentView('ethics'); setIsMobileMenuOpen(false); }}>
+              <FileText size={20} />
+              <span>Ethics & Terms</span>
+            </button>
+            <button className="mobile-nav-item" onClick={() => { setCurrentView('best-practices'); setIsMobileMenuOpen(false); }}>
+              <CheckCircle size={20} />
+              <span>Best Practices</span>
+            </button>
+          </div>
+        </div>
 
         {showAlertPanel && (
           <div className="alert-dropdown">
