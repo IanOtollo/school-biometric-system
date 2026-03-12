@@ -1074,7 +1074,7 @@ const BiometricAccessSystem = () => {
           ) : currentView === 'admin-login' ? (
             <AdminLoginView setCurrentView={setCurrentView} setIsAdminAuthenticated={setIsAdminAuthenticated} />
           ) : currentView === 'admin-management' ? (
-            <AdminManagementView setCurrentView={setCurrentView} isAdminAuthenticated={isAdminAuthenticated} />
+            <AdminManagementView setCurrentView={setCurrentView} isAdminAuthenticated={isAdminAuthenticated} setIsAdminAuthenticated={setIsAdminAuthenticated} />
           ) : currentView === 'ethics' ? (
             <EthicsTermsView setCurrentView={setCurrentView} />
           ) : currentView === 'best-practices' ? (
@@ -2643,7 +2643,7 @@ const AdminLoginView = ({ setCurrentView, setIsAdminAuthenticated }) => {
 };
 
 // Admin Management View Component
-const AdminManagementView = ({ setCurrentView, isAdminAuthenticated }) => {
+const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminAuthenticated }) => {
   const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
