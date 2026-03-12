@@ -1,4 +1,4 @@
--- Migration Script for School Biometric System
+-- Migration Script for School Biometric System - FIX
 -- Run this in your Supabase SQL Editor
 
 -- 1. Add new columns to the users table
@@ -7,7 +7,10 @@ ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('
 ADD COLUMN IF NOT EXISTS profile_image TEXT,
 ADD COLUMN IF NOT EXISTS visitor_tag VARCHAR(100);
 
--- 2. Update the user_access_summary view to include new columns
+-- 2. Drop the existing view first to avoid column name mismatch errors
+DROP VIEW IF EXISTS user_access_summary;
+
+-- 3. Update the user_access_summary view to include new columns
 CREATE OR REPLACE VIEW user_access_summary AS
 SELECT 
     u.id_number,
