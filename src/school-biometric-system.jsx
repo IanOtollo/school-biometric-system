@@ -2514,22 +2514,6 @@ const DashboardView = ({ setCurrentView }) => {
     }
   };
 
-  const deleteUser = async (idNumber) => {
-    if (!confirm('Are you sure you want to delete this person?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id_number', idNumber);
-
-      if (error) throw error;
-
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
 
   return (
     <div>
@@ -2605,7 +2589,6 @@ const DashboardView = ({ setCurrentView }) => {
                       <th>Status</th>
                       <th>Email/Phone</th>
                       <th>Registered</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2638,15 +2621,6 @@ const DashboardView = ({ setCurrentView }) => {
                         </td>
                         <td>{user.email || '-'}</td>
                         <td>{new Date(user.registered_at).toLocaleDateString()}</td>
-                        <td>
-                          <button
-                            className="btn btn-danger"
-                            onClick={() => deleteUser(user.id_number)}
-                            style={{ padding: '0.375rem 0.75rem' }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -2856,6 +2830,29 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminA
     }
   };
 
+  const deletePerson = async (idNumber) => {
+    if (!confirm('Are you sure you want to delete this person? This action cannot be undone.')) return;
+    
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id_number', idNumber);
+
+      if (error) throw error;
+
+      setPeople(prev => prev.filter(p => p.id_number !== idNumber));
+      setMessage({ type: 'success', text: 'Person deleted successfully' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      console.error('Error deleting person:', error);
+      setMessage({ type: 'error', text: 'Failed to delete person' });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2984,20 +2981,32 @@ const AdminManagementView = ({ setCurrentView, isAdminAuthenticated, setIsAdminA
                       {person.status}
                     </span>
                   </td>
-                  <td>
-                    <select
-                      className="form-select"
-                      style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                      value={person.status}
-                      onChange={(e) => updateStatus(person.id_number, e.target.value)}
-                      disabled={updating}
-                    >
-                      <option value="active">Active</option>
-                      <option value="graduate">Graduate</option>
-                      <option value="suspended">Suspended</option>
-                      <option value="discontinued">Discontinued</option>
-                    </select>
-                  </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <select
+                          className="form-select"
+                          style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                          value={person.status}
+                          onChange={(e) => updateStatus(person.id_number, e.target.value)}
+                          disabled={updating}
+                        >
+                          <option value="active">Active</option>
+                          <option value="graduate">Graduate</option>
+                          <option value="suspended">Suspended</option>
+                          <option value="discontinued">Discontinued</option>
+                          <option value="visitor">Visitor</option>
+                        </select>
+                        <button 
+                          className="btn btn-danger"
+                          onClick={() => deletePerson(person.id_number)}
+                          disabled={updating}
+                          title="Delete Person"
+                          style={{ padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
                 </tr>
               ))}
             </tbody>
